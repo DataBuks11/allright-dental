@@ -118,7 +118,7 @@ export class UniversalMicrophone {
 }
 
 // ============================================================================
-// 2. High-Precision 24kHz Linear16 PCM Audio Player (Seamless Buffer Queue)
+// 2. High-Precision 24kHz Linear16 PCM Audio Player with Adaptive Jitter Buffer
 // ============================================================================
 export class PCMPlayer {
   constructor(options = {}) {
@@ -128,6 +128,15 @@ export class PCMPlayer {
     this.nextStartTime = 0;
     this.activeSources = new Set();
     this.isMuted = true; // Start muted: voice audio only plays when call is active
+
+    // Smooth Jitter Buffer State: eliminates stutter / packet jitter
+    this.pendingChunks = [];
+    this.bufferedSamples = 0;
+    this.isPlaying = false;
+    // 250ms pre-buffer cushion (24000 * 0.25 = 6000 samples) absorbs synthesis delays
+    this.prebufferSamples = Math.round(this.sampleRate * 0.25);
+    // Batch size of ~120ms (2880 samples) to prevent excessive AudioNode creation
+    this.batchSamples = Math.round(this.sampleRate * 0.12);
   }
 
   _ensureContext() {
@@ -148,36 +157,88 @@ export class PCMPlayer {
   queue(chunk) {
     if (this.isMuted || !chunk) return;
     try {
-      const ctx = this._ensureContext();
       const int16 = chunk instanceof Int16Array ? chunk : new Int16Array(chunk);
       if (int16.length === 0) return;
 
-      const float32 = new Float32Array(int16.length);
-      for (let i = 0; i < int16.length; i++) {
-        float32[i] = int16[i] / (int16[i] < 0 ? 0x8000 : 0x7FFF);
+      this.pendingChunks.push(int16);
+      this.bufferedSamples += int16.length;
+
+      // 1. Initial speech start: buffer 250ms cushion before triggering first playback
+      if (!this.isPlaying) {
+        if (this.bufferedSamples >= this.prebufferSamples) {
+          this._playBatch();
+        }
+        return;
       }
 
-      const audioBuffer = ctx.createBuffer(1, float32.length, this.sampleRate);
-      audioBuffer.copyToChannel(float32, 0);
-
-      const source = ctx.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(this.gainNode);
-
-      const startTime = Math.max(ctx.currentTime, this.nextStartTime);
-      source.start(startTime);
-      this.nextStartTime = startTime + audioBuffer.duration;
-
-      this.activeSources.add(source);
-      source.onended = () => {
-        this.activeSources.delete(source);
-      };
+      // 2. Already actively playing: schedule contiguous batches seamlessly
+      if (this.bufferedSamples >= this.batchSamples) {
+        this._playBatch();
+      }
     } catch (e) {
       console.warn("[PCMPlayer] Queue playback notice:", e);
     }
   }
 
+  flush() {
+    if (this.pendingChunks.length > 0) {
+      this._playBatch();
+    }
+  }
+
+  _playBatch() {
+    if (this.isMuted || this.pendingChunks.length === 0) return;
+    const ctx = this._ensureContext();
+
+    // Combine all pending Int16 chunks into one contiguous Float32 buffer
+    const totalSamples = this.bufferedSamples;
+    const float32 = new Float32Array(totalSamples);
+    let offset = 0;
+    for (const chunk of this.pendingChunks) {
+      for (let i = 0; i < chunk.length; i++) {
+        float32[offset++] = chunk[i] / (chunk[i] < 0 ? 0x8000 : 0x7FFF);
+      }
+    }
+
+    // Reset buffer tracking
+    this.pendingChunks = [];
+    this.bufferedSamples = 0;
+
+    // Create single contiguous Web Audio buffer
+    const audioBuffer = ctx.createBuffer(1, float32.length, this.sampleRate);
+    audioBuffer.copyToChannel(float32, 0);
+
+    const source = ctx.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(this.gainNode);
+
+    // Sample-accurate gapless scheduling
+    const currentTime = ctx.currentTime;
+    let startTime;
+    if (!this.isPlaying || this.nextStartTime < currentTime) {
+      startTime = currentTime + 0.035; // 35ms Web Audio lookahead cushion
+    } else {
+      startTime = this.nextStartTime;
+    }
+
+    source.start(startTime);
+    this.nextStartTime = startTime + audioBuffer.duration;
+    this.isPlaying = true;
+
+    this.activeSources.add(source);
+    source.onended = () => {
+      this.activeSources.delete(source);
+      if (this.activeSources.size === 0 && this.pendingChunks.length === 0) {
+        this.isPlaying = false;
+        this.nextStartTime = 0;
+      }
+    };
+  }
+
   interrupt() {
+    this.pendingChunks = [];
+    this.bufferedSamples = 0;
+    this.isPlaying = false;
     for (const src of this.activeSources) {
       try {
         src.stop();
@@ -386,6 +447,7 @@ export class DeepgramDirectAgent {
             this.callbacks.onThinking?.(false);
             this.callbacks.onSpeaking?.();
           } else if (type === "AgentAudioDone") {
+            this.player.flush();
             this.callbacks.onThinking?.(false);
             this.callbacks.onAudioDone?.();
           } else if (type === "ConversationText") {
