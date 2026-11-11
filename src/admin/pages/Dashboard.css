@@ -1,0 +1,123 @@
+.dashboard-container {
+  min-height: 100vh;
+  width: 1412px;
+  max-width: 100vw;
+  background: linear-gradient(-45deg, #00bcd4, #3f51b5, #4caf50, #ff9800);
+  background-size: 400% 400%;
+  animation: gradientFlow 15s ease infinite;
+  overflow-x: hidden; /* optional, to prevent horizontal scroll */
+}
+
+  
+  .dashboard-content {
+    margin-left: 250px;
+    flex-grow: 1;
+    padding: 5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-left: 20px;
+    margin-bottom: 30px;
+  }
+  
+  @keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  .animate-zoom-in {
+    animation: zoomIn 1s ease-in-out;
+  }
+  
+  @keyframes zoomIn {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  /* .dashboard-cards {
+    margin-top: 30px;
+    margin-left: 100px;
+  } */
+  
+  /* .card-box {
+    width: 260px;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  } */
+  
+  /* .card-box:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  } */
+  
+  .glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+  
+  .admin-footer {
+    background-color: #1e293b; /* dark slate background */
+    font-size: 0.9rem;
+    color: #f1f5f9;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: fixed;
+    left: 250px; /* match sidebar width */
+    bottom: 0;
+    right: 0;
+    z-index: 999;
+  }
+  
+  .dashboard-cards .card-box {
+    width: 280px;
+    min-height: 180px;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .dashboard-cards .card-box:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+  }
+
+  .card-box {
+    width: 250px;
+    min-height: 220px;   /* ensures equal card size */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* pushes button to bottom */
+    align-items: center;
+    padding: 20px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+  }
+  
+  .card-box:hover {
+    transform: translateY(-5px);
+  }
+  
+  .card-box h5,
+  .card-box h2,
+  .card-box p {
+    margin: 5px 0;
+  }
+  
+  .card-box .btn {
+    align-self: center;   /* centers button */
+  }
+  
+  

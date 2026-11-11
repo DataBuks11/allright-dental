@@ -1,0 +1,233 @@
+.heading-container {
+    background-color: #00B7AA;
+    color: white;
+    padding: 1rem 0;
+    font-size: 1.8rem;
+    font-weight: bold;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .heading-container h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  
+  .contacts-container {
+    background: linear-gradient(to bottom right, #f0fdfd, #c2d4cc);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 2rem auto;
+    max-width: 95%;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    margin-left: 200px;
+  }
+
+  .contacts-container {
+    animation: fadeInBackground 1s ease forwards;
+  }
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #e0f7fa, #f1f8e9);
+  }
+  
+  /* Glassmorphism Panel */
+  div.mx-auto.p-6 {
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+  }
+  
+  /* Headings */
+  h2 {
+    font-family: 'Segoe UI', sans-serif;
+    letter-spacing: 0.5px;
+    color: #2c3e50;
+  }
+  
+  h3 {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 1.25rem;
+  }
+  
+  /* Date Picker */
+  input[type="date"] {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    transition: all 0.3s ease;
+  }
+  
+  input[type="date"]:hover,
+  input[type="date"]:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  }
+  
+  /* Slot Buttons */
+  button {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    font-size: 0.95rem;
+    transition: all 0.2s ease-in-out;
+    border: none;
+    outline: none;
+  }
+
+  button::before {
+    margin-right: 8px;
+  }
+  
+  
+  button:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+  
+  /* Status Colors */
+  .bg-green-600 {
+    background: linear-gradient(to right, #38ef7d, #11998e) !important;
+  }
+  
+  .bg-green-700 {
+    background: linear-gradient(to right, #11998e, #0f9b8e) !important;
+  }
+  
+  .bg-red-600 {
+    background: linear-gradient(to right, #f85032, #e73827) !important;
+  }
+  
+  .bg-red-700 {
+    background: linear-gradient(to right, #e73827, #b71540) !important;
+  }
+  
+  .bg-yellow-500 {
+    background: linear-gradient(to right, #fceabb, #f8b500) !important;
+    color: #212121;
+  }
+  
+  .bg-yellow-600 {
+    background: linear-gradient(to right, #f8b500, #ffda00) !important;
+    color: #212121;
+  }
+  
+  /* Legend */
+  .flex.items-center.gap-2 > span:first-child {
+    border: 1px solid #ccc;
+  }
+
+  .react-datepicker {
+    font-family: 'Segoe UI', sans-serif;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+  
+  .react-datepicker__header {
+    background-color: #38bdf8;
+    color: white;
+    border-bottom: none;
+  }
+  
+  /* Overlay (same as before) */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* Base popup box */
+.popup-box {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  animation: popIn 0.3s ease-out;
+}
+
+/* Success */
+.popup-box.success {
+  border-left: 6px solid #16a34a;
+}
+.popup-box.success p {
+  color: #166534;
+}
+
+/* Warning */
+.popup-box.warning {
+  border-left: 6px solid #eab308;
+}
+.popup-box.warning p {
+  color: #92400e;
+}
+
+/* Error */
+.popup-box.error {
+  border-left: 6px solid #dc2626;
+}
+.popup-box.error p {
+  color: #991b1b;
+}
+
+/* Button */
+.popup-box button {
+  margin-top: 10px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.popup-box button:hover {
+  background: #1e40af;
+}
+
+/* Animation */
+@keyframes popIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+  
+  /* Responsive Columns */
+  @media (max-width: 768px) {
+    .grid-cols-3 {
+      grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+  }
+  

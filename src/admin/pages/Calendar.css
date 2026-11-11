@@ -1,0 +1,146 @@
+/* ========================= */
+/* Calendar Page Styles      */
+/* ========================= */
+
+.calendar-page-container {
+  background: linear-gradient(to bottom right, #f0fdfd, #c2d4cc);
+  font-family: 'Segoe UI', sans-serif;
+  margin: 2rem auto;
+  max-width: 95%;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  margin-left: 200px; /* adjust for sidebar */
+}
+
+.calendar-heading {
+  background-color: #00B7AA;
+  color: white;
+  padding: 1rem 0;
+  font-size: 1.8rem;
+  font-weight: bold;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.calendar-heading h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-date-tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  padding: 0.5rem;
+}
+
+.calendar-date-tabs button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  min-width: 80px;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.calendar-date-tabs button.active {
+  background-color: #003BC4;
+  color: white;
+}
+
+.calendar-date-tabs button.inactive {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.calendar-date-tabs button.inactive:hover {
+  background-color: #003BC4;
+  color: white;
+}
+
+.calendar-room-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.calendar-room {
+  text-align: center;
+}
+
+.calendar-room h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.calendar-slot-button {
+  display: block;
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  color: white;
+}
+
+.calendar-slot-green {
+  background: linear-gradient(to right, #38ef7d, #11998e);
+}
+
+.calendar-slot-green:hover {
+  background: linear-gradient(to right, #11998e, #0f9b8e);
+}
+
+.calendar-slot-red {
+  background: linear-gradient(to right, #f85032, #e73827);
+}
+
+.calendar-slot-red:hover {
+  background: linear-gradient(to right, #e73827, #b71540);
+}
+
+.calendar-slot-yellow {
+  background: linear-gradient(to right, #fceabb, #f8b500);
+  color: #212121;
+}
+
+.calendar-slot-yellow:hover {
+  background: linear-gradient(to right, #f8b500, #ffda00);
+}
+
+.calendar-slot-gray {
+  background: linear-gradient(to right, #9e9e9e, #616161);
+  color: white;
+}
+
+.calendar-slot-gray:hover {
+  background: linear-gradient(to right, #757575, #424242);
+}
+
+
+.calendar-book-btn {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(to right, #003BC4, #00B7AA);
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease;
+}
+
+.calendar-book-btn:hover {
+  transform: scale(1.05);
+}

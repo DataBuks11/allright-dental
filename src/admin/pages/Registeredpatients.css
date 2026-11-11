@@ -1,0 +1,242 @@
+/* Container layout */
+.appointments-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: auto;
+    background: linear-gradient(135deg, #e0f7fa, #e1f5fe);
+    animation: bgFadeIn 5s ease-in-out infinite alternate;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-left: 250px; /* for fixed sidebar */
+    padding: 20px;
+  }
+  
+  .appointments-bg {
+    flex: 1;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+  }
+  
+  
+  @keyframes bgFadeIn {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  /* Header section */
+  .heading-container {
+    background-color: #00B7AA;
+    color: white;
+    padding: 1rem 0;
+    font-size: 1.8rem;
+    font-weight: bold;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    animation: fadeSlideDown 0.8s ease;
+  }
+  
+  @keyframes fadeSlideDown {
+    0% {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .heading-container h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* Action row (search, filter, download) */
+  .search-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.8s ease-in;
+    margin-left: 20px;
+    margin-top: 20px;
+  }
+  
+  .search-bar input[type="text"],
+  .search-bar input[type="date"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    min-width: 250px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .search-bar button {
+    padding: 10px 16px;
+    background-color: #00B7AA;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s ease;
+  }
+  
+  .search-bar button:hover {
+    background-color: #01988f;
+    transform: scale(1.05);
+  }
+  
+  /* Table layout */
+  .table-wrapper {
+    max-height: 450px;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #d1d5db; /* optional, Tailwind border-gray-300 */
+    border-radius: 6px;
+  }
+  
+  
+  @keyframes fadeInUp {
+    0% {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  table {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    text-align: center;
+    font-size: 14px;
+  }
+  
+  thead th {
+    position: sticky;
+    top: 0;
+    background-color: #00B7AA;
+    color: white;
+    padding: 12px;
+    z-index: 1;
+    font-weight: bold;
+    border: 1px solid #e5e7eb;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  thead th:hover {
+    background-color: #01988f; /* Slightly darker shade on hover */
+    color: #f0fdfd; /* Optional: softer white tone for hover */
+    cursor: default; /* Keeps pointer as default since it's not clickable */
+  }
+  
+  table td {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    background-color: white;
+    transition: background-color 0.3s;
+  }
+  
+  tr:hover {
+    background-color: #f1f5f9;
+  }
+  
+  /* Buttons in table */
+  .action-btn {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+    margin-right: 5px;
+    transform: scale(1);
+  }
+  
+  .save-btn {
+    background-color: #00B7AA;
+    color: white;
+  }
+  
+  .edit-btn {
+    background-color: #FFD700;
+    color: #333;
+  }
+  
+  .delete-btn {
+    background-color: #FF6347;
+    color: white;
+  }
+  
+  .action-btn:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+  
+  /* Pagination */
+  /* .pagination-btn {
+    background-color: #e0e7ff;
+    color: #333;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .pagination-btn:hover {
+    background-color: #00B7AA;
+    color: white;
+  }
+  
+  .pagination-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  } */
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .admin-footer {
+    position: fixed;
+    left: 250px; /* Align with sidebar width */
+    right: 0;
+    bottom: 0;
+    background-color: #1e293b;
+    color: #f1f5f9;
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 0;
+    z-index: 999;
+  }
+  

@@ -1,0 +1,122 @@
+/* General Reset & Typography */
+body {
+  margin: -39px;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+}
+
+p {
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #1b4332;
+}
+
+.sidebar .nav-link {
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar .nav-link.active {
+  background-color: #28a745;
+  font-weight: 600;
+}
+
+.sidebar h4 {
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+
+/* Dashboard Buttons */
+.btn-lg {
+  padding: 12px 20px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-lg:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Tables */
+.table th {
+  background-color: #28a745;
+  color: white;
+}
+
+.table td, .table th {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Forms (Login, Search Inputs) */
+.form-control {
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.form-control:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+}
+
+/* Login Wrapper */
+.login-wrapper {
+  background-color: #ffffff;
+  padding: 30px;
+  margin-top: 80px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+/* Buttons */
+.btn {
+  border-radius: 6px;
+}
+
+.btn-outline-light:hover {
+  background-color: #ffffff;
+  color: #212529;
+}
+
+.text-muted {
+  font-size: 0.9rem;
+  color: #888 !important;
+}
+
+/* Responsive Flex Content Padding */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .flex-grow-1 {
+    margin-left: 0 !important;
+    padding: 20px !important;
+  }
+
+  .btn-lg {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
