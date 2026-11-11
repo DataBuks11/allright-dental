@@ -1,6 +1,5 @@
 /**
  * Allright Dental - High-Performance Direct Deepgram Voice Agent Client
- * Bypasses experimental @deepgram/agents SDK to eliminate 10s open timeout crashes.
  * Built with native WebSocket, resilient auto-reconnect, 24kHz linear16 PCM player,
  * and Universal cross-platform 16kHz microphone capture (Android, iOS, Windows, Mac).
  */
@@ -22,14 +21,25 @@ export class UniversalMicrophone {
 
   async start() {
     if (this.stream) return;
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-        channelCount: 1
+
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+    } catch (err) {
+      // Robust fallback for devices or browsers with strict audio constraints
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (fallbackErr) {
+        console.error("[UniversalMicrophone] getUserMedia failed:", fallbackErr);
+        throw fallbackErr;
       }
-    });
+    }
     this.stream = stream;
 
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -117,7 +127,7 @@ export class PCMPlayer {
     this.gainNode = null;
     this.nextStartTime = 0;
     this.activeSources = new Set();
-    this.isMuted = false;
+    this.isMuted = true; // Start muted: voice audio only plays when call is active
   }
 
   _ensureContext() {
@@ -163,7 +173,7 @@ export class PCMPlayer {
         this.activeSources.delete(source);
       };
     } catch (e) {
-      console.warn("[PCMPlayer] Queue playback error:", e);
+      console.warn("[PCMPlayer] Queue playback notice:", e);
     }
   }
 
@@ -189,6 +199,7 @@ export class PCMPlayer {
 
   unmute() {
     this.isMuted = false;
+    this._ensureContext();
   }
 
   dispose() {
@@ -242,9 +253,24 @@ export class DeepgramDirectAgent {
     this.sessionId = null;
     this.isSpanish = false;
     this.config = null;
+    this.connectPromise = null;
+  }
+
+  isReady() {
+    return Boolean(this.settingsApplied && this.ws && this.ws.readyState === WebSocket.OPEN);
   }
 
   async connect({ isSpanish = false, prompt, functions = [], keyterms = [] }) {
+    // If already fully connected and settings applied, reuse immediately!
+    if (this.isReady()) {
+      return this;
+    }
+
+    // If a connection is already being established, deduplicate and wait for it!
+    if (this.connectPromise) {
+      return this.connectPromise;
+    }
+
     this.disconnect();
     this.isSpanish = isSpanish;
     this.settingsApplied = false;
@@ -280,15 +306,26 @@ export class DeepgramDirectAgent {
       }
     };
 
-    return new Promise((resolve, reject) => {
-      let resolved = false;
+    this.connectPromise = new Promise((resolve, reject) => {
+      let settled = false;
+
+      // 6-second safety timeout so connect NEVER hangs in limbo
+      const timeoutTimer = setTimeout(() => {
+        if (!settled) {
+          settled = true;
+          this.connectPromise = null;
+          try { if (this.ws) this.ws.close(); } catch (e) {}
+          reject(new Error("Connection timeout: Voice service did not respond within 6 seconds."));
+        }
+      }, 6000);
+
       try {
         const ws = new WebSocket(DEEPGRAM_WS_URL, ["token", this.apiKey]);
         ws.binaryType = "arraybuffer";
         this.ws = ws;
 
         ws.onopen = () => {
-          console.log("[DeepgramDirectAgent] WebSocket connected. Sending Settings...");
+          console.log("[DeepgramDirectAgent] WebSocket open. Dispatching Settings...");
           ws.send(JSON.stringify(this.config));
 
           // KeepAlive ping every 8 seconds
@@ -320,20 +357,22 @@ export class DeepgramDirectAgent {
           if (type === "Welcome") {
             this.sessionId = data.request_id || data.session_id;
           } else if (type === "SettingsApplied") {
-            console.log("[DeepgramDirectAgent] Settings Applied. Agent is live!");
+            console.log("[DeepgramDirectAgent] Settings Applied. Sarah is live and ready!");
             this.settingsApplied = true;
-            if (!resolved) {
-              resolved = true;
-              resolve();
+            if (!settled) {
+              settled = true;
+              clearTimeout(timeoutTimer);
+              this.connectPromise = null;
+              resolve(this);
             }
             this.callbacks.onConnected?.();
 
-            // Flush pending user messages
+            // Flush pending user text messages
             while (this.pendingUserMessages.length > 0) {
               const msg = this.pendingUserMessages.shift();
               this.injectUserMessage(msg);
             }
-            // Flush pending audio
+            // Flush buffered audio frames
             while (this.pendingAudioQueue.length > 0) {
               const pcm = this.pendingAudioQueue.shift();
               this.sendAudio(pcm);
@@ -383,7 +422,7 @@ export class DeepgramDirectAgent {
               this.callbacks.onFunctionCall?.(fnId, fnName, fnArgs, sendResponse);
             }
           } else if (type === "Error") {
-            console.warn("[DeepgramDirectAgent] Server notice:", data);
+            console.warn("[DeepgramDirectAgent] Server event notice:", data);
             this.callbacks.onError?.(data);
           }
         };
@@ -391,9 +430,11 @@ export class DeepgramDirectAgent {
         ws.onerror = (err) => {
           console.error("[DeepgramDirectAgent] Socket error:", err);
           this.callbacks.onError?.(err);
-          if (!resolved) {
-            resolved = true;
-            reject(err);
+          if (!settled) {
+            settled = true;
+            clearTimeout(timeoutTimer);
+            this.connectPromise = null;
+            reject(err || new Error("Voice agent WebSocket connection error"));
           }
         };
 
@@ -405,20 +446,30 @@ export class DeepgramDirectAgent {
             this.keepAliveTimer = null;
           }
           this.callbacks.onDisconnected?.(evt);
+          if (!settled) {
+            settled = true;
+            clearTimeout(timeoutTimer);
+            this.connectPromise = null;
+            reject(new Error(`WebSocket closed before settings applied (code: ${evt.code})`));
+          }
         };
       } catch (err) {
-        if (!resolved) {
-          resolved = true;
+        if (!settled) {
+          settled = true;
+          clearTimeout(timeoutTimer);
+          this.connectPromise = null;
           reject(err);
         }
       }
     });
+
+    return this.connectPromise;
   }
 
   injectUserMessage(text) {
     if (!text || !text.trim()) return;
     const clean = text.trim();
-    if (this.settingsApplied && this.ws && this.ws.readyState === WebSocket.OPEN) {
+    if (this.isReady()) {
       this.ws.send(JSON.stringify({ type: "InjectUserMessage", content: clean }));
     } else {
       this.pendingUserMessages.push(clean);
@@ -427,11 +478,10 @@ export class DeepgramDirectAgent {
 
   sendAudio(pcmBuffer) {
     if (!pcmBuffer) return;
-    if (this.settingsApplied && this.ws && this.ws.readyState === WebSocket.OPEN) {
+    if (this.isReady()) {
       this.ws.send(pcmBuffer);
     } else {
-      // Buffer up to 10 frames if socket is still establishing
-      if (this.pendingAudioQueue.length < 10) {
+      if (this.pendingAudioQueue.length < 20) {
         this.pendingAudioQueue.push(pcmBuffer);
       }
     }
@@ -459,6 +509,7 @@ export class DeepgramDirectAgent {
   }
 
   disconnect() {
+    this.connectPromise = null;
     this.stopMicrophone();
     this.player.interrupt();
     if (this.keepAliveTimer) {
@@ -480,4 +531,3 @@ export class DeepgramDirectAgent {
     this.pendingAudioQueue = [];
   }
 }
-

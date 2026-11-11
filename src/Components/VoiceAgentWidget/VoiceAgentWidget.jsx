@@ -239,16 +239,17 @@ Follow this natural, responsive receptionist flow for every call and chat:
      -> IMMEDIATELY invoke update_patient_record(name, first_name, last_name, dob, email, phone, insurance)!
      -> Warmly confirm the update: "Thank you, [Name]! I have updated your record in our clinic database with Doctor Shalini. Your records are now fully up to date."
 
-*** RECEPTIONIST GUARDRAILS & PERMITTED TOPICS (STRICT) ***:
-1. HIPAA COMPLIANCE & PATIENT PRIVACY (ALWAYS EXPLAIN WARMLY):
-   - If asked about HIPAA, privacy, or security (or if STT transcribes "hepatic appliances" or "HIPAA compliances"):
-     -> Warmly answer: "Allright Dental is 100% HIPAA compliant! All patient charts, dental treatment histories, and insurance verifications are secured with bank-grade encryption to ensure complete privacy. Doctor Shalini Mandapatti and our team uphold the highest federal healthcare privacy standards."
-2. DENTAL ORAL APPLIANCES (ALWAYS EXPLAIN & OFFER CONSULTATION):
+*** RECEPTIONIST GUARDRAILS & CLINICAL TOPICS (STRICT) ***:
+1. HIPAA COMPLIANCE, DATA SECURITY & PATIENT PRIVACY (ALWAYS EXPLAIN FULLY):
+   - If asked about HIPAA, privacy, security, confidentiality, or if speech-to-text transcribes "hepatic appliances", "hipaa appliances", "hepatic", or "HIPAA compliances":
+     -> NEVER REFUSE! Warmly answer: "Allright Dental is 100% HIPAA compliant! All patient charts, dental treatment histories, and insurance verifications are secured with bank-grade encryption to ensure complete privacy. Doctor Shalini Mandapatti and our team uphold the highest federal healthcare privacy standards."
+2. DENTAL ORAL APPLIANCES, NIGHTGUARDS & MOUTHGUARDS (ALWAYS WELCOME):
    - Custom nightguards for bruxism (teeth grinding / jaw clenching), athletic sports mouthguards, retainers, and bite splints are core clinical dental services provided by Doctor Shalini Mandapatti!
-   - If asked about oral appliances or nightguards: "Doctor Shalini custom-crafts comfortable dental oral appliances, including custom nightguards for teeth grinding and jaw soreness, athletic sports guards, and retainers. Would you like to schedule a visit for a custom fitting?"
-3. CLEAR OFF-TOPIC QUESTIONS ONLY:
-   - Arithmetic/math calculations (e.g. "What is 2+2?"), computer programming/code, politics, general trivia, weather, cooking recipes, or non-dental tasks.
-   - Refusal response: "I'm specialized exclusively as the dental receptionist for Allright Dental and Doctor Shalini. I'm here to assist with dental appointments, treatments, insurance, and patient care. How may I assist your smile today?"
+   - If asked about appliances, nightguards, mouthguards, or oral fittings:
+     -> NEVER REFUSE! Warmly answer: "Doctor Shalini custom-crafts comfortable dental oral appliances, including custom nightguards for teeth grinding and jaw soreness, athletic sports guards, and retainers. Would you like to schedule a visit for a custom fitting?"
+3. GENERAL RECEPTIONIST GUIDANCE:
+   - For ANY question related to dentistry, teeth, cleanings, oral health, appointments, our clinic, Doctor Shalini, insurances, or patient records, ALWAYS answer warmly and helpfully!
+   - Only politely redirect if a question is completely non-dental (e.g. computer coding, complex math, or politics): "I'm specialized as the dental receptionist for Allright Dental and Doctor Shalini. I'm here to assist with dental appointments, treatments, insurance, and patient care. How may I assist your smile today?"
 4. NEVER refuse language selection (e.g. "English", "Spanish", "inglés", "español")!
 5. NEVER refuse dates of birth, days, times, contact info, or short polite responses ("Yes", "Sure", "Okay", "No")!
 
@@ -449,6 +450,7 @@ export default function VoiceAgentWidget() {
 
   // Direct Deepgram Agent Client Instance
   const agentRef = useRef(null);
+  const connectingPromiseRef = useRef(null);
 
   const callActiveRef = useRef(false);
   useEffect(() => {
@@ -852,7 +854,17 @@ export default function VoiceAgentWidget() {
   };
 
   // Initialize Native Direct Deepgram Agent Client
-  const initAgent = async (startVoice = false) => {
+  const initAgent = async () => {
+    // If agent is already connected and ready, return immediately
+    if (agentRef.current && agentRef.current.isReady()) {
+      return agentRef.current;
+    }
+
+    // If an agent connection is currently in progress, return the pending promise!
+    if (connectingPromiseRef.current) {
+      return connectingPromiseRef.current;
+    }
+
     if (agentRef.current) {
       agentRef.current.disconnect();
       agentRef.current = null;
@@ -898,6 +910,9 @@ export default function VoiceAgentWidget() {
         }
       },
       onTranscript: (role, text) => {
+        if (role === 'assistant') {
+          setTypingSafe(false); // Stop typing indicator as soon as assistant response arrives
+        }
         handleTranscriptUpdate(role, text);
       },
       onFunctionCall: async (fnId, fnName, fnArgs, sendResponse) => {
@@ -915,46 +930,42 @@ export default function VoiceAgentWidget() {
 
     agentRef.current = agent;
 
-    try {
-      await agent.connect({
-        isSpanish: isEsp,
-        prompt: promptText,
-        functions: AGENT_FUNCTIONS,
-        keyterms: NOVA_KEYTERMS
-      });
-
-      if (startVoice) {
-        await agent.startMicrophone();
-        setCallActive(true);
-        callActiveRef.current = true;
-        setStatus("listening");
+    connectingPromiseRef.current = (async () => {
+      try {
+        await agent.connect({
+          isSpanish: isEsp,
+          prompt: promptText,
+          functions: AGENT_FUNCTIONS,
+          keyterms: NOVA_KEYTERMS
+        });
+        connectingPromiseRef.current = null;
+        return agent;
+      } catch (err) {
+        console.error("[Allright Dental] Connection initialization error:", err);
+        connectingPromiseRef.current = null;
+        if (callActiveRef.current) {
+          setStatus("idle");
+          setCallActive(false);
+          callActiveRef.current = false;
+        }
+        return null;
       }
-    } catch (err) {
-      console.error("[Allright Dental] Connection initialization error:", err);
-      setStatus("idle");
-      setCallActive(false);
-      callActiveRef.current = false;
-    }
+    })();
+
+    return connectingPromiseRef.current;
   };
 
-  // Connect agent on widget open for instant text chat readiness
+  // Pre-connect WebSocket on component mount so Sarah is 100% warm and ready
   useEffect(() => {
-    if (isOpen) {
-      initAgent(false);
-    } else {
-      endCall();
-      if (agentRef.current) {
-        agentRef.current.disconnect();
-        agentRef.current = null;
-      }
-    }
+    initAgent();
     return () => {
       if (agentRef.current) {
         agentRef.current.disconnect();
         agentRef.current = null;
       }
+      connectingPromiseRef.current = null;
     };
-  }, [isOpen]);
+  }, []);
 
   const startCall = async () => {
     if (callActiveRef.current) return;
@@ -962,21 +973,35 @@ export default function VoiceAgentWidget() {
     setStatus("connecting");
 
     try {
-      if (!agentRef.current || !agentRef.current.settingsApplied) {
-        await initAgent(true);
-        return;
+      // 1. Ensure agent connection is ready
+      let agent = agentRef.current;
+      if (!agent || !agent.isReady()) {
+        agent = await initAgent();
       }
 
-      await agentRef.current.startMicrophone();
-      agentRef.current.player.unmute();
+      if (!agent || !agent.isReady()) {
+        throw new Error("Unable to establish voice connection. Please check your internet connection.");
+      }
+
+      // 2. Start microphone under direct user interaction
+      await agent.startMicrophone();
+      agent.player.unmute();
       setCallActive(true);
       callActiveRef.current = true;
       setStatus("listening");
     } catch (err) {
-      console.error("[Allright Dental] Microphone start error:", err);
+      console.error("[Allright Dental] Microphone / Voice start error:", err);
       setStatus("idle");
       setCallActive(false);
       callActiveRef.current = false;
+
+      let errorMsg = "Could not activate microphone. Please check your audio permissions.";
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        errorMsg = "Microphone access was denied. Please allow microphone permissions in your browser address bar.";
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      alert(errorMsg);
     }
   };
 
@@ -984,6 +1009,7 @@ export default function VoiceAgentWidget() {
     if (agentRef.current) {
       agentRef.current.stopMicrophone();
       agentRef.current.interrupt();
+      agentRef.current.player.mute();
     }
     setCallActive(false);
     callActiveRef.current = false;
@@ -997,6 +1023,7 @@ export default function VoiceAgentWidget() {
       agentRef.current.disconnect();
       agentRef.current = null;
     }
+    connectingPromiseRef.current = null;
     setMeetingCode(null);
     setVerifiedPatient(null);
     currentPatientQueryRef.current = { name: "", dob: "" };
@@ -1009,8 +1036,8 @@ export default function VoiceAgentWidget() {
       }
     ]);
     setTimeout(() => {
-      initAgent(false);
-    }, 150);
+      initAgent();
+    }, 100);
   };
 
   const toggleLanguage = () => {
@@ -1029,12 +1056,12 @@ export default function VoiceAgentWidget() {
     setTranscript(prev => [...prev, { role: "user", text: query }]);
     setTypingSafe(true);
 
-    if (agentRef.current) {
+    if (agentRef.current && agentRef.current.isReady()) {
       agentRef.current.interrupt();
       agentRef.current.injectUserMessage(query);
     } else {
-      initAgent(false).then(() => {
-        agentRef.current?.injectUserMessage(query);
+      initAgent().then((agent) => {
+        agent?.injectUserMessage(query);
       });
     }
   };
@@ -1044,12 +1071,12 @@ export default function VoiceAgentWidget() {
     setTranscript(prev => [...prev, { role: "user", text: prompt }]);
     setTypingSafe(true);
 
-    if (agentRef.current) {
+    if (agentRef.current && agentRef.current.isReady()) {
       agentRef.current.interrupt();
       agentRef.current.injectUserMessage(prompt);
     } else {
-      initAgent(false).then(() => {
-        agentRef.current?.injectUserMessage(prompt);
+      initAgent().then((agent) => {
+        agent?.injectUserMessage(prompt);
       });
     }
   };
