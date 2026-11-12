@@ -314,7 +314,7 @@ export default function PatientForm() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
     if (!validatePage(3)) return;
 
     const chartNum = `CHR-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -974,7 +974,7 @@ export default function PatientForm() {
               )}
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 sm:p-10">
+            <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 sm:p-10">
               
               {/* PAGE 1: MEDICAL HISTORY */}
               {activePage === 1 && (
@@ -1814,15 +1814,16 @@ export default function PatientForm() {
                   </button>
                 ) : (
                   <button
-                    type="submit"
-                    className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:opacity-95 text-white px-8 py-3.5 rounded-full text-sm font-extrabold shadow-lg transition active:scale-95"
+                    type="button"
+                    onClick={handleSubmit}
+                    className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:opacity-95 text-white px-8 py-3.5 rounded-full text-sm font-extrabold shadow-lg transition active:scale-95 cursor-pointer"
                   >
                     <FaCheckCircle /> Complete & Submit Official 3-Page Intake
                   </button>
                 )}
               </div>
 
-            </form>
+            </div>
           )}
 
         </div>

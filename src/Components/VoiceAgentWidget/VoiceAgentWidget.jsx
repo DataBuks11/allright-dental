@@ -70,6 +70,28 @@ const cleanSpokenPhone = (raw) => {
   return raw;
 };
 
+// Universal friendly human-readable appointment date formatter
+const formatFriendlyDate = (raw) => {
+  if (!raw) return "Upcoming Open Slot";
+  const str = String(raw).trim();
+  if (str.includes("T") || /^\d{4}-\d{2}-\d{2}/.test(str)) {
+    try {
+      const d = new Date(str.replace(" ", "T"));
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+    } catch (e) {}
+  }
+  return str;
+};
+
 // 8 Practice Dental Services - 1-Tap Booking (Minimizes procedures)
 export const DENTAL_SERVICES = [
   { id: "cleaning", icon: "🦷", label: "Routine Cleaning", prompt: "I'd like to schedule a Routine Cleaning and Exam with Doctor Shalini." },
@@ -204,22 +226,26 @@ Follow this natural, responsive receptionist flow for every call and chat:
    - FOR NEW PATIENT:
      Ask: "What is the best phone number and email address to send your appointment confirmation and digital intake forms?"
 
-4. STRATEGIC SLOT OFFERING HIERARCHY (CAPACITY & PEAK REVENUE MANAGEMENT):
+4. STRATEGIC SLOT OFFERING (MUST ALWAYS PRESENT SPECIFIC DATES & TIMES):
    Clinic Open Days: Wednesday, Thursday, Friday (10:00 AM - 5:00 PM), and Saturday morning (9:00 AM - 1:00 PM half-day).
-   Follow this exact tiered offering order when presenting available times:
-   - TIER 1 (First Choice): Propose Wednesday or Thursday MORNING slots first (e.g. "We have Wednesday at 10:30 AM or Thursday at 11:00 AM. Would one of those work for you?").
-   - TIER 2 (If Afternoon Needed): Propose Wednesday or Thursday AFTERNOON slots (e.g. "We have Wednesday at 2:30 PM or Thursday at 3:30 PM.").
-   - TIER 3 (If Friday Needed): Propose Friday MORNING slots first (e.g. "On Friday, we have a morning opening at 10:30 AM.").
-   - TIER 4 (Friday Evening / Late Afternoon - High Demand): Offer Friday afternoon/evening slots (e.g. Friday at 3:30 PM or 4:00 PM) as the LAST option because Friday evening is in highest patient demand!
-   - SATURDAY (Weekend): If caller specifically asks for weekend or Saturday, offer Saturday morning between 9:00 AM and 1:00 PM (e.g. "Doctor Shalini has Saturday morning at 10:00 AM or 11:30 AM.").
-   - PATIENT SPECIFIC REQUEST (FLEXIBILITY): If a patient requests a specific day or time (e.g. "Do you have anything Friday at 3 PM?" or "Can I do Saturday morning?"), check availability and if open, IMMEDIATELY offer and confirm it! Never refuse an open slot requested by the patient.
+   - When offering slots, YOU MUST ALWAYS STATE AT LEAST 2 SPECIFIC OPEN TIMES:
+     * Morning: "Doctor Shalini has Wednesday at 10:30 AM or Thursday at 11:00 AM."
+     * Afternoon: "Doctor Shalini has Wednesday at 2:30 PM or Thursday at 3:30 PM."
+     * Friday: "On Friday, we have 10:30 AM morning or 3:30 PM afternoon."
+     * Saturday: "Doctor Shalini has Saturday morning at 10:00 AM or 11:30 AM."
+   - ALWAYS ASK: "Which of those days and times works best for you?"
+   - NEVER make a vague statement like "I was able to find afternoon slots" without listing the actual times! Always state the exact times!
 
-5. LOCKING IN & BOOKING (STRICT NO-AUTO-BOOK & STRICT NO CODES):
-   - Once caller agrees to a day and time, ask: "So that is [Day, Date] at [Time]. Shall I lock that in for you with Doctor Shalini?"
-   - ONLY when caller says "Yes" (or confirms):
-     -> IMMEDIATELY call the book_appointment(name, datetime, service, phone, email) tool!
-     -> Confirm warmly: "You are all confirmed for [Day, Date] at [Time] with Doctor Shalini Mandapatti at Allright Dental, 229 Plaza Boulevard, Suite 23, Morrisville, PA! We have noted your contact details and look forward to seeing you."
-     -> STRICT NO CODES: NEVER recite or give check-in codes, chart IDs, or meeting codes to the patient!
+5. STRICT NO-AUTO-BOOK GUARDRAIL (NEVER BOOK ON A GENERAL "YES" WITHOUT DATE SELECTION):
+   - CRITICAL: A simple "Yes", "Sure", "Okay", or "I want an appointment" IS NOT A SLOT SELECTION!
+   - If the patient has NOT yet selected a specific day and time (e.g. they only said "Yes" to scheduling), YOU MUST NOT CALL 'book_appointment'!
+   - Instead, ask: "Which day and time would you prefer? Doctor Shalini has Wednesday at 10:30 AM or Thursday at 2:30 PM."
+   - YOU MAY ONLY CALL 'book_appointment' WHEN:
+     1. The patient has explicitly stated or agreed to a specific day & time (e.g. "Wednesday at 10:30 AM", "Thursday at 2:30 PM", or a specific date requested by the patient).
+     2. AND you confirm: "So that is [Day] at [Time]. Shall I lock that in for you?" and they say "Yes" (or when they directly tell you to book that specific time).
+   - STRICT FORMAT FOR 'datetime': Pass a clear human-readable string like "Wednesday, Nov 18 at 10:30 AM" or "Thursday at 2:30 PM". NEVER pass an ISO timestamp like "2026-11-19T15:30:00".
+   - Confirm warmly: "You are all confirmed for [Day, Date] at [Time] with Doctor Shalini Mandapatti at Allright Dental, 229 Plaza Boulevard, Suite 23, Morrisville, PA! We have noted your contact details and look forward to seeing you."
+   - STRICT NO CODES: NEVER recite or give check-in codes, chart IDs, or meeting codes to the patient!
 
 6. INSURANCE & WRAP-UP:
    - Ask: "Will you be using dental insurance for this visit?" (e.g. Delta Dental, MetLife, Cigna, Guardian, Principal Life).
@@ -349,12 +375,12 @@ const AGENT_FUNCTIONS = [
   },
   {
     name: "book_appointment",
-    description: "Books and confirms a dental appointment with Doctor Shalini Mandapatti. ONLY CALL THIS AFTER caller has agreed to their appointment day and time! STRICT: NO CODES!",
+    description: "Books and confirms a dental appointment with Doctor Shalini Mandapatti. CRITICAL GUARDRAIL: ONLY call this tool AFTER the caller has explicitly chosen a specific day and time (e.g. 'Wednesday at 10:30 AM')! NEVER call this tool when the patient only says 'Yes', 'Okay', or 'I want an appointment' without choosing a time. If no specific time was chosen, DO NOT call this tool — ask the patient to choose between available slots first.",
     parameters: {
       type: "object",
       properties: {
         name: { type: "string", description: "Patient full name" },
-        datetime: { type: "string", description: "The appointment day and time chosen by patient (e.g. Wednesday at 10:30 AM)" },
+        datetime: { type: "string", description: "The specific appointment day and time explicitly chosen by the patient (e.g. Wednesday at 10:30 AM). NEVER an ISO timestamp." },
         service: { type: "string", description: "Dental service or reason for visit (e.g. cleaning, toothache, exam)" },
         phone: { type: "string", description: "Patient confirmed contact phone number" },
         email: { type: "string", description: "Patient confirmed email address for reminders" }
@@ -397,6 +423,7 @@ export default function VoiceAgentWidget() {
   const [meetingCode, setMeetingCode] = useState(null);
   const [verifiedPatient, setVerifiedPatient] = useState(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [activeChipTab, setActiveChipTab] = useState("services"); // "services" | "slots"
 
   // Responsive mobile viewport tracking
   const [visualHeight, setVisualHeight] = useState(
@@ -832,7 +859,30 @@ export default function VoiceAgentWidget() {
       };
       sendResponse(insPayload);
     } else if (fnName === "book_appointment") {
-      const dt = args.datetime || "Upcoming Open Slot";
+      let rawDt = (args.datetime || "").trim();
+      
+      // Guardrail: Detect generic or unselected slot
+      const isGeneric = !rawDt || 
+        rawDt.toLowerCase() === "upcoming open slot" ||
+        rawDt.toLowerCase() === "afternoon" ||
+        rawDt.toLowerCase() === "morning" ||
+        rawDt.toLowerCase() === "yes" ||
+        rawDt.toLowerCase() === "soon" ||
+        rawDt.toLowerCase() === "available slot";
+
+      if (isGeneric) {
+        const availableSlots = getNextAvailableSlots();
+        const rejectPayload = {
+          confirmed: false,
+          error: "NO_SLOT_SELECTED",
+          instruction: `STOP! The patient has NOT selected a specific day or time yet. DO NOT book. You MUST ask the patient: "Which day and time works best for you? Doctor Shalini has ${availableSlots.wedThuMorning.join(" or ")}." Wait for them to choose.`
+        };
+        sendResponse(rejectPayload);
+        return;
+      }
+
+      // Convert any raw ISO timestamps like 2026-11-19T15:30:00 to friendly human readable text
+      const dt = formatFriendlyDate(rawDt);
       const pName = (args.name || verifiedPatient?.display_name || "Valued Patient").replace(/[^a-zA-Z\s]/g, "").trim() || "Valued Patient";
       const phone = args.phone || (verifiedPatient?.phone && !verifiedPatient.phone.includes("295-1348") ? verifiedPatient.phone : "");
       const email = args.email || verifiedPatient?.email || "";
@@ -1256,7 +1306,7 @@ export default function VoiceAgentWidget() {
               <div>
                 <p className="font-bold text-[11px] sm:text-xs">Appointment Confirmed with Doctor Shalini!</p>
                 <p className="text-[10px] sm:text-[11px] text-emerald-800">
-                  Time: <span className="font-semibold bg-emerald-200/60 px-1.5 py-0.5 rounded">{meetingCode}</span> • 229 Plaza Blvd, Suite 23
+                  Time: <span className="font-semibold bg-emerald-200/60 px-1.5 py-0.5 rounded">{formatFriendlyDate(meetingCode)}</span> • 229 Plaza Blvd, Suite 23
                 </p>
               </div>
             </div>
@@ -1294,28 +1344,77 @@ export default function VoiceAgentWidget() {
             <div ref={chatBottomRef} />
           </div>
 
-          {/* Quick Dental Services - ALL 8 Services Prominently Displayed (Zero Truncation) */}
+          {/* Quick Dental Services & Interactive Slot Chooser */}
           <div className="px-2.5 py-2 bg-gradient-to-b from-blue-50/90 to-slate-50 border-t border-blue-100 shrink-0">
             <div className="flex items-center justify-between mb-1.5 px-0.5">
-              <span className="text-[10px] uppercase font-bold text-blue-900 tracking-wider flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span> Select Dental Service (1-Tap):
-              </span>
-              <span className="text-[9px] text-gray-500 font-medium">8 Services Available</span>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 max-h-32 overflow-y-auto pr-0.5">
-              {DENTAL_SERVICES.map(s => (
+              <div className="flex items-center gap-1.5">
                 <button
-                  key={s.id}
                   type="button"
-                  onClick={() => handleQuickAction(s.prompt)}
-                  className="text-[10.5px] sm:text-[11px] bg-white hover:bg-blue-50 hover:text-[#003BC4] hover:border-blue-400 text-gray-800 font-medium px-2 py-1.5 rounded-xl border border-blue-200/70 transition-all shadow-2xs active:scale-95 flex items-center gap-1.5 cursor-pointer text-left truncate group"
-                  title={s.label}
+                  onClick={() => setActiveChipTab("services")}
+                  className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                    activeChipTab === 'services'
+                      ? "bg-blue-600 text-white shadow-2xs"
+                      : "text-blue-900 bg-blue-100/70 hover:bg-blue-200/70"
+                  }`}
                 >
-                  <span className="text-xs group-hover:scale-110 transition-transform shrink-0">{s.icon}</span>
-                  <span className="truncate">{s.label}</span>
+                  🦷 Services
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setActiveChipTab("slots")}
+                  className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md transition-all flex items-center gap-1 cursor-pointer ${
+                    activeChipTab === 'slots'
+                      ? "bg-[#003BC4] text-white shadow-2xs"
+                      : "text-blue-900 bg-blue-100/70 hover:bg-blue-200/70"
+                  }`}
+                >
+                  📅 Choose Slot (1-Tap)
+                </button>
+              </div>
+              <span className="text-[9px] text-gray-500 font-medium">
+                {activeChipTab === 'services' ? "8 Services" : "Available Times"}
+              </span>
             </div>
+
+            {activeChipTab === 'services' ? (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 max-h-32 overflow-y-auto pr-0.5">
+                {DENTAL_SERVICES.map(s => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => {
+                      if (s.id === 'slots') {
+                        setActiveChipTab("slots");
+                      }
+                      handleQuickAction(s.prompt);
+                    }}
+                    className="text-[10.5px] sm:text-[11px] bg-white hover:bg-blue-50 hover:text-[#003BC4] hover:border-blue-400 text-gray-800 font-medium px-2 py-1.5 rounded-xl border border-blue-200/70 transition-all shadow-2xs active:scale-95 flex items-center gap-1.5 cursor-pointer text-left truncate group"
+                    title={s.label}
+                  >
+                    <span className="text-xs group-hover:scale-110 transition-transform shrink-0">{s.icon}</span>
+                    <span className="truncate">{s.label}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-1.5 max-h-32 overflow-y-auto pr-0.5 animate-in fade-in">
+                {(getNextAvailableSlots().allAvailableList || getNextAvailableSlots().recommended || []).map((slot, sIdx) => (
+                  <button
+                    key={sIdx}
+                    type="button"
+                    onClick={() => {
+                      handleQuickAction(`I would like to book ${slot.replace(/\s*\(.*\)/, '')} with Doctor Shalini.`);
+                      setActiveChipTab("services");
+                    }}
+                    className="text-[10.5px] bg-white hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-400 text-gray-800 font-semibold px-2 py-1.5 rounded-xl border border-emerald-200 transition-all shadow-2xs active:scale-95 flex items-center gap-1.5 cursor-pointer text-left truncate"
+                    title={slot}
+                  >
+                    <span className="text-xs text-emerald-600 shrink-0">🗓️</span>
+                    <span className="truncate">{slot}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Chat Input Bar with Integrated Microphone & Send Buttons */}

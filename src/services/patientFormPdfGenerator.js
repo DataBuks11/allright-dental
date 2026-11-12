@@ -338,3 +338,4 @@ export function downloadFilledPatientFormPDF(formData, chartId = "") {
   doc.save(fileName);
   return fileName;
 }
+
