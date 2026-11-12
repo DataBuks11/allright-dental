@@ -25,6 +25,7 @@ function Navbar() {
     },
     { name: 'Insurance', href: '/Insurance' },
     { name: 'AI Receptionist', href: '/voice-receptionist' },
+    { name: 'Patient Form', href: '/patient-form' },
     { name: 'Blog', href: '/blog' },
     { name: 'Reviews', href: '/reviews' },
     { name: 'Contact Us', href: '/contactus' },

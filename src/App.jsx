@@ -21,6 +21,7 @@ import PeriodonticTreatment from "./Pages/PeriodonticTreatment/PeriodonticTreatm
 import Dentures from "./Pages/Dentures/Dentures";
 import EmergencyService from "./Pages/EmergencyService/EmergencyService";
 import VoiceReceptionist from "./Pages/VoiceReceptionist/VoiceReceptionist";
+import PatientForm from "./Pages/PatientForm/PatientForm";
 
 // ✅ Lazy load admin app
 const AdminApp = React.lazy(() => import("./admin/App"));
@@ -64,6 +65,8 @@ function App() {
           <Route path="/periodontic-treatments" element={<PeriodonticTreatment />} />
           <Route path="/dentures" element={<Dentures />} />
           <Route path="/emergency-service" element={<EmergencyService />} />
+          <Route path="/patient-form" element={<PatientForm />} />
+          <Route path="/patient-intake" element={<PatientForm />} />
         </Route>
 
         {/* ✅ Admin routes are lazy-loaded */}

@@ -55,10 +55,17 @@ function DentalPractice() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
-                        <h3 className="text-2xl font-bold text-[#003BC4] mb-4">Download patient forms</h3>
-                        <p className="text-gray-600 mb-6 text-lg leading-relaxed">Complete your paperwork in advance to streamline your visit.</p>
-                        <div className="mt-auto">
-                            <Button btnContent="Download" className="w-full" onCLick={handlePDFDownload}/>
+                        <h3 className="text-2xl font-bold text-[#003BC4] mb-4">Patient intake forms</h3>
+                        <p className="text-gray-600 mb-6 text-lg leading-relaxed">Complete your digital paperwork online in 2 minutes before your visit, or download PDF.</p>
+                        <div className="mt-auto flex flex-col gap-2.5">
+                            <Button btnContent="Fill Out Online" link="/patient-form" className="w-full" />
+                            <button
+                                type="button"
+                                onClick={handlePDFDownload}
+                                className="w-full text-xs font-semibold text-gray-500 hover:text-[#003BC4] py-1 transition text-center cursor-pointer underline"
+                            >
+                                Download blank PDF form
+                            </button>
                         </div>
                     </div>
                 </div>
