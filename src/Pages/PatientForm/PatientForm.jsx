@@ -24,6 +24,7 @@ import {
   FaEdit
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { downloadFilledPatientFormPDF } from '../../services/patientFormPdfGenerator';
 
 // Exact 8 allergies from Page 1 of Clinic Paper Form
 const ALLERGIES_LIST = [
@@ -362,6 +363,15 @@ export default function PatientForm() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDirectDownload = () => {
+    try {
+      downloadFilledPatientFormPDF(formData, confirmationId);
+    } catch (err) {
+      console.error("Direct PDF download error:", err);
+      window.print();
+    }
   };
 
   return (
@@ -815,36 +825,52 @@ export default function PatientForm() {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleDirectDownload}
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:opacity-95 text-white px-7 py-3.5 rounded-full text-xs sm:text-sm font-extrabold transition shadow-lg active:scale-95 cursor-pointer"
+                    title="Instantly download the filled 3-page PDF to your device"
+                  >
+                    <FaDownload /> Download Filled 3-Page PDF
+                  </button>
                   <button
                     type="button"
                     onClick={handlePrint}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#003BC4] hover:bg-[#002FA0] text-white px-7 py-3 rounded-full text-xs sm:text-sm font-bold transition shadow-lg"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#003BC4] hover:bg-[#002FA0] text-white px-6 py-3.5 rounded-full text-xs sm:text-sm font-bold transition shadow-md active:scale-95 cursor-pointer"
+                    title="Open browser print dialog for printing or saving"
                   >
-                    <FaPrint /> Print / Save 3-Page Intake Record
+                    <FaPrint /> Print Official Form
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowDocumentPreview(prev => !prev)}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-5 py-3 rounded-full text-xs sm:text-sm font-semibold transition cursor-pointer"
                   >
-                    <FaEye /> {showDocumentPreview ? "Hide Document Preview" : "Preview 3-Page Document"}
+                    <FaEye /> {showDocumentPreview ? "Hide Preview" : "Preview 3-Page Form"}
                   </button>
+                  <a
+                    href="/patientForm.pdf"
+                    download="AllRight_Dental_Blank_Form.pdf"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-3 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer shadow-2xs"
+                  >
+                    <FaFilePdf className="text-red-600" /> Blank Paper PDF
+                  </a>
                   <button
                     type="button"
                     onClick={() => {
                       setSubmitted(false);
                       setActivePage(1);
                     }}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-3 rounded-full text-xs sm:text-sm font-semibold transition"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer"
                   >
-                    <FaEdit /> Edit Form
+                    <FaEdit /> Edit
                   </button>
                   <Link
                     to="/Appointment"
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white px-7 py-3 rounded-full text-xs sm:text-sm font-bold shadow-md transition"
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#003BC4] hover:bg-[#002fa0] text-white px-6 py-3 rounded-full text-xs sm:text-sm font-bold shadow-md transition"
                   >
-                    Book Appointment <FaArrowRight />
+                    Book Visit <FaArrowRight />
                   </Link>
                 </div>
               </div>
@@ -852,17 +878,29 @@ export default function PatientForm() {
               {/* On-Screen Document Preview (When user toggles Preview) */}
               {showDocumentPreview && (
                 <div className="bg-white rounded-3xl shadow-xl border border-slate-300 p-6 sm:p-10 space-y-8 animate-in fade-in">
-                  <div className="flex items-center justify-between border-b border-gray-200 pb-3">
-                    <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                      <FaFileContract className="text-[#003BC4]" /> Document Preview (Exact 3-Page Medical Document)
-                    </h3>
-                    <button
-                      type="button"
-                      onClick={handlePrint}
-                      className="flex items-center gap-2 bg-[#003BC4] text-white text-xs px-4 py-2 rounded-full font-bold shadow-sm"
-                    >
-                      <FaPrint /> Print This Document
-                    </button>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 pb-3 gap-3">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <FaFileContract className="text-[#003BC4]" /> Exact 3-Page Clinic Document Preview
+                      </h3>
+                      <p className="text-xs text-gray-500">Matching patient_form_p1, p2, p3 of Doctor Shalini's clinic form</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDirectDownload}
+                        className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-full font-bold shadow-sm cursor-pointer"
+                      >
+                        <FaDownload /> Download PDF
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handlePrint}
+                        className="flex items-center gap-1.5 bg-[#003BC4] hover:bg-[#002FA0] text-white text-xs px-4 py-2 rounded-full font-bold shadow-sm cursor-pointer"
+                      >
+                        <FaPrint /> Print
+                      </button>
+                    </div>
                   </div>
 
                   {/* Page 1 Preview Box */}
@@ -872,10 +910,23 @@ export default function PatientForm() {
                       <p className="text-[11px] text-gray-600">229 Plaza Blvd. Ste #23 • Morrisville, PA 19067</p>
                     </div>
                     <div className="grid grid-cols-2 gap-2 border-b border-slate-300 pb-2">
-                      <div><strong>Patient Name:</strong> {formData.firstName} {formData.lastName}</div>
+                      <div><strong>PATIENT NAME:</strong> {formData.firstName} {formData.lastName}</div>
                       <div><strong>Birth Date:</strong> {formData.dob}</div>
                       <div><strong>Phone:</strong> {formData.phone}</div>
                       <div><strong>Address:</strong> {formData.address}, {formData.city}, {formData.state} {formData.zip}</div>
+                    </div>
+                    <div className="border-b border-slate-200 pb-2">
+                      <p className="font-bold mb-1">General Health Answers:</p>
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px]">
+                        <li>• Physician's care: <strong>{formData.underPhysicianCare === 'yes' ? `Yes (${formData.underPhysicianCareExplain})` : 'No'}</strong></li>
+                        <li>• Hospitalized/Surgery: <strong>{formData.hospitalizedOrOperation === 'yes' ? `Yes (${formData.hospitalizedOrOperationExplain})` : 'No'}</strong></li>
+                        <li>• Head/Neck injury: <strong>{formData.headNeckInjury === 'yes' ? `Yes (${formData.headNeckInjuryExplain})` : 'No'}</strong></li>
+                        <li>• Medications/Blood thinners: <strong>{formData.takingMedications === 'yes' ? `Yes (${formData.takingMedicationsExplain})` : 'No'}</strong></li>
+                        <li>• Phen-Fen / Redux: <strong>{formData.takenPhenFen}</strong></li>
+                        <li>• Bisphosphonates (Fosamax, Boniva): <strong>{formData.takenBisphosphonates}</strong></li>
+                        <li>• Special diet: <strong>{formData.specialDiet}</strong></li>
+                        <li>• Tobacco: <strong>{formData.usesTobacco}</strong></li>
+                      </ul>
                     </div>
                     <div>
                       <strong>Allergies:</strong> {formData.allergies.length > 0 ? formData.allergies.join(", ") : "None reported"}
