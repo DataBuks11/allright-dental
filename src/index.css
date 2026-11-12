@@ -48,3 +48,45 @@ input, textarea, button, select, a {
 .overscroll-contain {
   overscroll-behavior: contain;
 }
+
+
+/* Print Media Styles for Official 3-Page Patient Forms */
+@media print {
+  header,
+  nav,
+  footer,
+  .no-print,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    font-size: 10pt !important;
+    line-height: 1.3 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    size: letter portrait;
+    margin: 10mm 12mm 12mm 12mm;
+  }
+
+  .print-page {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .print-page-break {
+    page-break-before: always !important;
+    break-before: page !important;
+    margin-top: 10mm !important;
+  }
+}

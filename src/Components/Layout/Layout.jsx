@@ -10,14 +10,22 @@ function Layout() {
 
   return (
     <>
-      <Navbar />
+      <div className="no-print print:hidden">
+        <Navbar />
+      </div>
       <main>
         <Outlet />
       </main>
-      <Footer />
-      {!isVoicePage && <VoiceAgentWidget />}
+      <div className="no-print print:hidden">
+        <Footer />
+      </div>
+      {!isVoicePage && (
+        <div className="no-print print:hidden">
+          <VoiceAgentWidget />
+        </div>
+      )}
     </>
   )
 }
 
-export default Layout
+export default Layout;
