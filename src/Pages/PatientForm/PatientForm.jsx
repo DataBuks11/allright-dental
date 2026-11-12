@@ -16,45 +16,104 @@ import {
   FaArrowLeft, 
   FaSignature, 
   FaIdCard,
-  FaFilePdf
+  FaFilePdf,
+  FaExclamationTriangle,
+  FaCheck,
+  FaDownload
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
+// Exact 8 allergies from Page 1 of Clinic Paper Form
 const ALLERGIES_LIST = [
-  "Penicillin",
   "Aspirin",
+  "Penicillin",
   "Codeine",
-  "Local Anesthetics (Novocaine/Lidocaine)",
-  "Latex",
-  "Sulfa Drugs",
+  "Local Anesthetics",
   "Acrylic",
-  "Metal / Nickel",
-  "Sedatives"
+  "Metal",
+  "Latex",
+  "Sulfa drugs"
 ];
 
+// Exact 77 medical conditions from Page 1 of Clinic Paper Form
 const MEDICAL_CONDITIONS_LIST = [
-  "High Blood Pressure",
-  "Low Blood Pressure",
-  "Heart Attack / Surgery",
-  "Heart Murmur",
-  "Pacemaker",
+  "AIDS/HIV Positive",
+  "Alzheimer's Disease",
+  "Anaphylaxis",
+  "Anemia",
+  "Angina",
+  "Arthritis/Gout",
   "Artificial Heart Valve",
-  "Artificial Joint / Hip / Knee",
+  "Artificial Joint",
+  "Asthma",
+  "Blood Disease",
+  "Blood Transfusion",
+  "Breathing Problem",
+  "Bruise Easily",
+  "Cancer",
+  "Chemotherapy",
+  "Chest Pains",
+  "Cold Sores/Fever Blisters",
+  "Congenital Heart Disorder",
+  "Convulsions",
+  "Cortisone Medicine",
   "Diabetes",
-  "Asthma / Respiratory",
-  "Allergies / Sinus",
-  "Hepatitis (A, B or C)",
+  "Drug Addiction",
+  "Easily Winded",
+  "Emphysema",
+  "Epilepsy or Seizures",
+  "Excessive Bleeding",
+  "Excessive Thirst",
+  "Fainting Spells/Dizziness",
+  "Frequent Cough",
+  "Frequent Diarrhea",
+  "Frequent Headaches",
+  "Genital Herpes",
+  "Glaucoma",
+  "Hay Fever",
+  "Heart Attack/Failure",
+  "Heart Murmur",
+  "Heart Pacemaker",
+  "Heart Trouble/Disease",
+  "Hemophilia",
+  "Hepatitis A",
+  "Hepatitis B or C",
+  "Herpes",
+  "High Blood Pressure",
+  "High Cholesterol",
+  "Hives or Rash",
+  "Hypoglycemia",
+  "Irregular Heartbeat",
   "Kidney Problems",
+  "Leukemia",
   "Liver Disease",
-  "Epilepsy / Seizures",
+  "Low Blood Pressure",
+  "Lung Disease",
+  "Mitral Valve Prolapse",
+  "Osteoporosis",
+  "Pain in Jaw Joints",
+  "Parathyroid Disease",
+  "Psychiatric Care",
+  "Radiation Treatments",
+  "Recent Weight Loss",
+  "Renal Dialysis",
+  "Rheumatic Fever",
+  "Rheumatism",
+  "Scarlet Fever",
+  "Shingles",
+  "Sickle Cell Disease",
+  "Sinus Trouble",
+  "Spina Bifida",
+  "Stomach/Intestinal Disease",
   "Stroke",
-  "Bleeding Disorders / Anemia",
-  "Cancer / Tumors",
-  "Chemotherapy / Radiation",
-  "Thyroid Condition",
-  "Arthritis / Gout",
-  "Teeth Grinding / Jaw Soreness (TMJ)",
-  "Fainting / Dizziness"
+  "Swelling of Limbs",
+  "Thyroid Disease",
+  "Tonsillitis",
+  "Tuberculosis",
+  "Tumors or Growths",
+  "Ulcers",
+  "Venereal Disease",
+  "Yellow Jaundice"
 ];
 
 const DENTAL_REASONS = [
@@ -86,12 +145,13 @@ const US_DENTAL_INSURANCES = [
 ];
 
 export default function PatientForm() {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [activePage, setActivePage] = useState(1); // 1 = Medical History, 2 = HIPAA Consent, 3 = Treatment & Benefits Consent
   const [submitted, setSubmitted] = useState(false);
   const [confirmationId, setConfirmationId] = useState("");
+  const todayDate = new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = useState({
-    // Step 1: Demographics
+    // Page 1: Medical History - Patient Header
     firstName: "",
     lastName: "",
     dob: "",
@@ -102,56 +162,97 @@ export default function PatientForm() {
     city: "Morrisville",
     state: "PA",
     zip: "19067",
-    emergencyName: "",
-    emergencyPhone: "",
     dentalReason: "Routine Cleaning & Comprehensive Exam",
-    lastDentalVisit: "Within last 6 months",
 
-    // Step 2: Medical History
+    // Page 1: General Health Questions (exact paper form questions)
     underPhysicianCare: "no",
-    physicianCareDetails: "",
-    recentSurgery: "no",
-    surgeryDetails: "",
+    underPhysicianCareExplain: "",
+    hospitalizedOrOperation: "no",
+    hospitalizedOrOperationExplain: "",
     headNeckInjury: "no",
-    injuryDetails: "",
+    headNeckInjuryExplain: "",
     takingMedications: "no",
-    medicationsDetails: "",
+    takingMedicationsExplain: "",
     takenPhenFen: "no",
     takenBisphosphonates: "no", // Fosamax, Boniva, Actonel
+    specialDiet: "no",
     usesTobacco: "no",
     usesControlledSubstances: "no",
-    isPregnant: "no",
-    isNursing: "no",
-    allergies: [],
-    otherAllergies: "",
-    medicalConditions: [],
-    otherMedicalNotes: "",
 
-    // Step 3: Insurance
+    // Page 1: Women only
+    isPregnant: "no",
+    takingContraceptives: "no",
+    isNursing: "no",
+
+    // Page 1: Allergies checklist
+    allergies: [],
+    hasOtherAllergies: "no",
+    otherAllergiesExplain: "",
+
+    // Page 1: Conditions checklist
+    medicalConditions: [],
+    hasSeriousIllnessNotListed: "no",
+    seriousIllnessExplain: "",
+    page1Comments: "",
+
+    // Page 1: Medical History Signature
+    page1Signature: "",
+    page1SignatureDate: todayDate,
+
+    // Page 2: HIPAA Compliance Patient Consent Form
+    familyDiscussionConsent: "yes",
+    familyMembersAllowed: "",
+    hipaaPrintedName: "",
+    hipaaSignature: "",
+    hipaaSignatureDate: todayDate,
+    emergencyContactName: "",
+    emergencyContactPhone: "",
+
+    // Page 3: Consent for Treatment & Assignment of Benefits
     hasInsurance: "yes",
     insuranceProvider: "Delta Dental (PPO / Premier)",
     subscriberId: "",
     groupNumber: "",
     policyHolderName: "",
-    policyHolderDob: "",
     policyHolderRelationship: "Self",
+    policyHolderDob: "",
 
-    // Step 4: Consent & Signatures
-    familyDiscussionConsent: "yes",
-    familyMembersAllowed: "",
-    agreeTreatmentConsent: false,
-    agreeAssignmentBenefits: false,
-    agreeHipaaPrivacy: false,
-    typedSignature: "",
-    signatureDate: new Date().toISOString().split("T")[0]
+    treatmentConsentSignature: "",
+    treatmentConsentDate: todayDate,
+    benefitsAssignmentSignature: "",
+    benefitsAssignmentDate: todayDate,
+
+    autoFillSignatures: true
   });
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    const val = type === 'checkbox' ? checked : value;
+    
+    setFormData(prev => {
+      const next = { ...prev, [name]: val };
+      
+      // Auto-fill signatures across all 3 pages if toggled on
+      if (prev.autoFillSignatures) {
+        if (name === 'page1Signature') {
+          next.hipaaSignature = val;
+          next.treatmentConsentSignature = val;
+          next.benefitsAssignmentSignature = val;
+          if (!prev.hipaaPrintedName) next.hipaaPrintedName = val;
+        }
+        if (name === 'firstName' || name === 'lastName') {
+          const fullName = `${name === 'firstName' ? val : prev.firstName} ${name === 'lastName' ? val : prev.lastName}`.trim();
+          if (!prev.page1Signature) {
+            next.page1Signature = fullName;
+            next.hipaaSignature = fullName;
+            next.treatmentConsentSignature = fullName;
+            next.benefitsAssignmentSignature = fullName;
+            next.hipaaPrintedName = fullName;
+          }
+        }
+      }
+      return next;
+    });
   };
 
   const handleArrayToggle = (field, item) => {
@@ -164,49 +265,66 @@ export default function PatientForm() {
     });
   };
 
-  const validateStep = (step) => {
-    if (step === 1) {
+  const validatePage = (page) => {
+    if (page === 1) {
       if (!formData.firstName.trim() || !formData.lastName.trim()) {
-        alert("Please enter patient first and last name.");
+        alert("Please enter patient First and Last Name on Page 1.");
         return false;
       }
       if (!formData.dob) {
-        alert("Please select patient date of birth.");
+        alert("Please enter patient Date of Birth on Page 1.");
         return false;
       }
       if (!formData.phone.trim() || !formData.email.trim()) {
         alert("Please provide both phone number and email address for appointment confirmation.");
         return false;
       }
-    }
-    if (step === 4) {
-      if (!formData.agreeTreatmentConsent || !formData.agreeAssignmentBenefits || !formData.agreeHipaaPrivacy) {
-        alert("Please check all three required HIPAA consent and treatment authorizations to proceed.");
-        return false;
-      }
-      if (!formData.typedSignature.trim()) {
-        alert("Please type your full legal name as your electronic signature.");
+      if (!formData.page1Signature.trim()) {
+        alert("Please provide your electronic signature at the bottom of Page 1 (Medical History certification).");
         return false;
       }
     }
+
+    if (page === 2) {
+      if (!formData.emergencyContactName.trim() || !formData.emergencyContactPhone.trim()) {
+        alert("Please provide an Emergency Contact Name and Phone Number on Page 2 (HIPAA Form).");
+        return false;
+      }
+      if (!formData.hipaaSignature.trim()) {
+        alert("Please provide your electronic signature on Page 2 (HIPAA Consent Form).");
+        return false;
+      }
+    }
+
+    if (page === 3) {
+      if (!formData.treatmentConsentSignature.trim()) {
+        alert("Please sign Consent for Treatment on Page 3.");
+        return false;
+      }
+      if (!formData.benefitsAssignmentSignature.trim()) {
+        alert("Please sign Assignment of Benefits on Page 3.");
+        return false;
+      }
+    }
+
     return true;
   };
 
-  const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(4, prev + 1));
-      window.scrollTo({ top: 150, behavior: 'smooth' });
+  const handleNextPage = () => {
+    if (validatePage(activePage)) {
+      setActivePage(prev => Math.min(3, prev + 1));
+      window.scrollTo({ top: 120, behavior: 'smooth' });
     }
   };
 
-  const handlePrev = () => {
-    setCurrentStep(prev => Math.max(1, prev - 1));
-    window.scrollTo({ top: 150, behavior: 'smooth' });
+  const handlePrevPage = () => {
+    setActivePage(prev => Math.max(1, prev - 1));
+    window.scrollTo({ top: 120, behavior: 'smooth' });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!validateStep(4)) return;
+    if (!validatePage(3)) return;
 
     const chartNum = `CHR-${Math.floor(1000 + Math.random() * 9000)}`;
     setConfirmationId(chartNum);
@@ -224,11 +342,15 @@ export default function PatientForm() {
         birth_date: formData.dob,
         phone: formData.phone.trim(),
         email: formData.email.trim(),
+        address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zip}`,
+        emergency_contact: `${formData.emergencyContactName} (${formData.emergencyContactPhone})`,
         insurance: formData.hasInsurance === 'yes' ? formData.insuranceProvider : "Self-Pay",
         subscriber_id: formData.subscriberId || "N/A",
         medical_alerts: [
           ...(formData.allergies.length > 0 ? [`Allergies: ${formData.allergies.join(', ')}`] : []),
-          ...(formData.medicalConditions.length > 0 ? [`Conditions: ${formData.medicalConditions.join(', ')}`] : [])
+          ...(formData.medicalConditions.length > 0 ? [`Conditions: ${formData.medicalConditions.join(', ')}`] : []),
+          ...(formData.takenBisphosphonates === 'yes' ? ["Bone Density Meds (Bisphosphonates)"] : []),
+          ...(formData.takingMedications === 'yes' ? [`Meds: ${formData.takingMedicationsExplain}`] : [])
         ],
         intake_completed_at: new Date().toISOString(),
         isNew: false
@@ -245,81 +367,89 @@ export default function PatientForm() {
     }
 
     setSubmitted(true);
-    window.scrollTo({ top: 100, behavior: 'smooth' });
+    window.scrollTo({ top: 80, behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-gray-800 font-poppins pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-100 text-gray-800 font-poppins pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         
-        {/* Practice Header & HIPAA Verification Card */}
-        <div className="bg-white rounded-3xl shadow-md border border-blue-100 overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-[#003BC4] to-[#00B7AA] text-white p-6 sm:p-8">
+        {/* Practice Letterhead Header */}
+        <div className="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden mb-6">
+          <div className="bg-gradient-to-r from-[#003BC4] via-[#0055D4] to-[#00B7AA] text-white p-6 sm:p-8">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white backdrop-blur-xs mb-2">
-                  <FaShieldAlt className="text-emerald-300" /> HIPAA Compliant Online Registration
+                  <FaShieldAlt className="text-emerald-300" /> Official Dental Intake Portal
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Digital Patient Intake & Medical History</h1>
-                <p className="text-blue-100 text-sm mt-1">
-                  AllRight Dental PC • Doctor Shalini Mandapatti, DDS • Morrisville, PA
+                <p className="text-blue-100 text-xs sm:text-sm mt-1">
+                  AllRight Dental PC • Doctor Shalini Mandapatti, DDS • 229 Plaza Blvd, Suite 23, Morrisville, PA 19067
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <a
                   href="/patientForm.pdf"
                   download="AllRight_Dental_Patient_Form.pdf"
-                  className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white text-xs px-4 py-2.5 rounded-full font-medium transition border border-white/30 backdrop-blur-xs"
-                  title="Download paper PDF version"
+                  className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white text-xs px-4 py-2.5 rounded-full font-medium transition border border-white/30 backdrop-blur-xs shadow-xs"
+                  title="Download the official 3-page paper form PDF"
                 >
-                  <FaFilePdf /> Download Blank PDF
+                  <FaDownload /> Download Paper PDF
                 </a>
               </div>
             </div>
           </div>
 
-          <div className="bg-blue-50/70 border-b border-blue-100 px-6 py-3 flex flex-wrap items-center justify-between text-xs text-blue-900 gap-2">
-            <span>📍 229 Plaza Blvd, Suite 23, Morrisville, PA 19067</span>
-            <span>📞 (215) 295-1348</span>
-            <span className="font-semibold text-emerald-700">🔒 256-bit Bank Grade Encryption</span>
+          <div className="bg-blue-50/80 border-b border-blue-100 px-6 py-2.5 flex flex-wrap items-center justify-between text-xs text-blue-900 gap-2 font-medium">
+            <span>📍 229 Plaza Blvd, Ste #23, Morrisville, PA 19067</span>
+            <span>📞 Phone: (215) 295-1348</span>
+            <span className="text-emerald-700 font-semibold flex items-center gap-1">
+              <FaShieldAlt /> HIPAA Compliant 256-bit AES Encryption
+            </span>
           </div>
 
-          {/* Stepper Bar */}
+          {/* 3-Page Tab Navigation (Exact Match to Clinic's 3-Page Form) */}
           {!submitted && (
-            <div className="px-6 py-4 bg-white border-b border-gray-100">
-              <div className="flex items-center justify-between max-w-2xl mx-auto relative">
+            <div className="px-4 sm:px-8 py-3 bg-white border-b border-slate-200">
+              <div className="grid grid-cols-3 gap-2 max-w-2xl mx-auto">
                 {[
-                  { step: 1, label: "Demographics", icon: FaUser },
-                  { step: 2, label: "Medical History", icon: FaNotesMedical },
-                  { step: 3, label: "Insurance", icon: FaIdCard },
-                  { step: 4, label: "HIPAA & Consent", icon: FaFileContract },
-                ].map((s, idx) => {
-                  const Icon = s.icon;
-                  const isActive = currentStep === s.step;
-                  const isDone = currentStep > s.step;
+                  { page: 1, title: "Page 1: Medical History", subtitle: "Health, Allergies & 77 Conditions" },
+                  { page: 2, title: "Page 2: HIPAA Consent", subtitle: "Privacy Practices & Emergency Contact" },
+                  { page: 3, title: "Page 3: Treatment & Benefits", subtitle: "All Right Dental PC Authorization" },
+                ].map((p) => {
+                  const isActive = activePage === p.page;
+                  const isDone = activePage > p.page;
                   return (
-                    <div key={s.step} className="flex flex-col items-center z-10">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (currentStep > s.step) setCurrentStep(s.step);
-                        }}
-                        className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 shadow-sm ${
-                          isDone 
-                            ? "bg-emerald-600 text-white" 
-                            : isActive 
-                              ? "bg-[#003BC4] text-white ring-4 ring-blue-100 scale-105" 
-                              : "bg-gray-100 text-gray-400"
-                        }`}
-                      >
-                        {isDone ? <FaCheckCircle /> : <Icon />}
-                      </button>
-                      <span className={`text-[11px] sm:text-xs mt-1.5 font-medium ${
-                        isActive ? "text-[#003BC4] font-bold" : isDone ? "text-emerald-700" : "text-gray-400"
-                      }`}>
-                        {s.label}
-                      </span>
-                    </div>
+                    <button
+                      key={p.page}
+                      type="button"
+                      onClick={() => {
+                        if (activePage > p.page || validatePage(activePage)) {
+                          setActivePage(p.page);
+                        }
+                      }}
+                      className={`text-left p-2.5 rounded-xl border transition-all ${
+                        isActive
+                          ? "bg-blue-50 border-[#003BC4] text-[#003BC4] shadow-xs ring-2 ring-blue-100"
+                          : isDone
+                            ? "bg-emerald-50 border-emerald-300 text-emerald-800"
+                            : "bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-100"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold truncate">
+                          {isDone ? `✓ ${p.title.split(':')[0]}` : p.title.split(':')[0]}
+                        </span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                          isActive ? "bg-[#003BC4] text-white" : isDone ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-600"
+                        }`}>
+                          P.{p.page}
+                        </span>
+                      </div>
+                      <div className="text-[11px] font-semibold truncate mt-0.5 text-gray-800">
+                        {p.title.split(':')[1]}
+                      </div>
+                    </button>
                   );
                 })}
               </div>
@@ -329,28 +459,28 @@ export default function PatientForm() {
 
         {/* Success Confirmation View */}
         {submitted ? (
-          <div className="bg-white rounded-3xl shadow-xl border border-emerald-100 p-6 sm:p-10 text-center animate-in fade-in">
+          <div className="bg-white rounded-3xl shadow-xl border border-emerald-200 p-6 sm:p-10 text-center animate-in fade-in">
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
               <FaCheckCircle />
             </div>
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
-              Intake Completed & Verified
+              Official 3-Page Intake Form Verified & Recorded
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-3 mb-2">
-              Welcome to AllRight Dental, {formData.firstName}!
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-3 mb-2">
+              Registration Complete, {formData.firstName}!
             </h2>
-            <p className="text-gray-600 max-w-lg mx-auto text-sm sm:text-base leading-relaxed mb-6">
-              Your digital patient intake form and medical history have been securely encrypted and submitted directly to 
-              <strong> Doctor Shalini Mandapatti, DDS</strong>.
+            <p className="text-gray-600 max-w-xl mx-auto text-sm sm:text-base leading-relaxed mb-6">
+              All 3 official clinic forms (Medical History, HIPAA Consent, and Treatment & Benefits Assignment) 
+              have been electronically signed and transmitted to <strong>AllRight Dental PC</strong>.
             </p>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 max-w-md mx-auto text-left mb-8 space-y-2 text-xs sm:text-sm">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 max-w-lg mx-auto text-left mb-8 space-y-2.5 text-xs sm:text-sm">
               <div className="flex justify-between border-b border-gray-200 pb-2">
                 <span className="text-gray-500">Patient Chart ID:</span>
                 <span className="font-bold text-[#003BC4]">{confirmationId}</span>
               </div>
               <div className="flex justify-between border-b border-gray-200 pb-2">
-                <span className="text-gray-500">Patient Name:</span>
+                <span className="text-gray-500">Patient Full Name:</span>
                 <span className="font-semibold text-gray-800">{formData.firstName} {formData.lastName}</span>
               </div>
               <div className="flex justify-between border-b border-gray-200 pb-2">
@@ -358,16 +488,28 @@ export default function PatientForm() {
                 <span className="font-medium text-gray-800">{formData.dob}</span>
               </div>
               <div className="flex justify-between border-b border-gray-200 pb-2">
-                <span className="text-gray-500">Insurance on File:</span>
-                <span className="font-medium text-gray-800">{formData.hasInsurance === 'yes' ? formData.insuranceProvider : "Self-Pay"}</span>
+                <span className="text-gray-500">Contact Phone:</span>
+                <span className="font-medium text-gray-800">{formData.phone}</span>
               </div>
               <div className="flex justify-between border-b border-gray-200 pb-2">
-                <span className="text-gray-500">Reason for Visit:</span>
-                <span className="font-medium text-gray-800">{formData.dentalReason}</span>
+                <span className="text-gray-500">Emergency Contact:</span>
+                <span className="font-medium text-gray-800">{formData.emergencyContactName} ({formData.emergencyContactPhone})</span>
+              </div>
+              <div className="flex justify-between border-b border-gray-200 pb-2">
+                <span className="text-gray-500">Insurance on File:</span>
+                <span className="font-medium text-gray-800">{formData.hasInsurance === 'yes' ? `${formData.insuranceProvider} (ID: ${formData.subscriberId || 'N/A'})` : "Self-Pay / CareCredit"}</span>
+              </div>
+              <div className="flex justify-between border-b border-gray-200 pb-2">
+                <span className="text-gray-500">Page 1 Medical E-Signature:</span>
+                <span className="font-semibold text-emerald-700">{formData.page1Signature} ({formData.page1SignatureDate})</span>
+              </div>
+              <div className="flex justify-between border-b border-gray-200 pb-2">
+                <span className="text-gray-500">Page 2 HIPAA E-Signature:</span>
+                <span className="font-semibold text-emerald-700">{formData.hipaaSignature} ({formData.hipaaSignatureDate})</span>
               </div>
               <div className="flex justify-between pt-1">
-                <span className="text-gray-500">Signed Electronically by:</span>
-                <span className="font-semibold text-emerald-700">{formData.typedSignature} ({formData.signatureDate})</span>
+                <span className="text-gray-500">Page 3 Treatment & Benefits:</span>
+                <span className="font-semibold text-emerald-700">Signed & Authorized ({formData.treatmentConsentDate})</span>
               </div>
             </div>
 
@@ -375,274 +517,279 @@ export default function PatientForm() {
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-full text-sm font-semibold transition"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition shadow-md"
               >
-                <FaPrint /> Print / Save PDF Receipt
+                <FaPrint /> Print / Save 3-Page Intake Record
               </button>
               <Link
                 to="/Appointment"
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-[#003BC4] to-[#00B7AA] hover:opacity-95 text-white px-7 py-3 rounded-full text-sm font-bold shadow-md transition"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-[#003BC4] to-[#00B7AA] hover:opacity-95 text-white px-7 py-3 rounded-full text-xs sm:text-sm font-bold shadow-md transition"
               >
                 Book Appointment Time <FaArrowRight />
               </Link>
             </div>
           </div>
         ) : (
-          /* Multi-Step Intake Form */
-          <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-xl border border-blue-100 p-6 sm:p-10">
+          <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-xl border border-slate-200 p-6 sm:p-10">
             
-            {/* STEP 1: PATIENT DEMOGRAPHICS & CONTACT */}
-            {currentStep === 1 && (
+            {/* ========================================================= */}
+            {/* PAGE 1: MEDICAL HISTORY (EXACT MATCH TO PAPER FORM PAGE 1) */}
+            {/* ========================================================= */}
+            {activePage === 1 && (
               <div className="space-y-6 animate-in fade-in">
-                <div className="border-b border-gray-100 pb-3">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <FaUser className="text-[#003BC4]" /> 1. Patient Demographics & Contact
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-1">Please provide accurate personal information for your dental chart and billing.</p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">First Name *</label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      placeholder="e.g. Piyush"
-                      required
-                      className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Last Name *</label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      placeholder="e.g. Junghare"
-                      required
-                      className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                    />
+                
+                {/* Form Page Header */}
+                <div className="border-b-2 border-slate-800 pb-3 text-center sm:text-left">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <div>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full">
+                        Form 1 of 3 • Paper Replica
+                      </span>
+                      <h2 className="text-2xl font-black text-gray-900 tracking-tight mt-1">MEDICAL HISTORY</h2>
+                    </div>
+                    <span className="text-xs text-gray-500 font-medium">AllRight Dental PC</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Date of Birth *</label>
-                    <input
-                      type="date"
-                      name="dob"
-                      value={formData.dob}
-                      onChange={handleChange}
-                      required
-                      className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                    />
+                {/* Patient Information Bar */}
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1">PATIENT NAME *</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          placeholder="First Name"
+                          required
+                          className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          placeholder="Last Name"
+                          required
+                          className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-800 mb-1">Birth Date *</label>
+                      <input
+                        type="date"
+                        name="dob"
+                        value={formData.dob}
+                        onChange={handleChange}
+                        required
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Gender</label>
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleChange}
-                      className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                    >
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other / Prefer not to say</option>
-                    </select>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 border-t border-slate-200">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Mobile Phone *</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="(215) 555-0148"
+                        required
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address *</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="patient@email.com"
+                        required
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Gender</label>
+                      <select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                      >
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Street Address</label>
+                      <input
+                        type="text"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        placeholder="123 Main St"
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">City / State</label>
+                      <input
+                        type="text"
+                        name="city"
+                        value={`${formData.city}, ${formData.state}`}
+                        onChange={(e) => setFormData(p => ({ ...p, city: e.target.value.split(',')[0] || "Morrisville" }))}
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">ZIP Code</label>
+                      <input
+                        type="text"
+                        name="zip"
+                        value={formData.zip}
+                        onChange={handleChange}
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Mobile Phone Number *</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="(215) 555-0199"
-                      required
-                      className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Email Address *</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="name@example.com"
-                      required
-                      className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                    />
-                  </div>
+                {/* Exact Preamble Text from Paper Form Page 1 */}
+                <div className="p-3.5 bg-blue-50/70 border-l-4 border-[#003BC4] text-xs text-blue-950 italic rounded-r-xl leading-relaxed">
+                  "Although dental personnel primarily treat the area in and around your mouth, your mouth is a part of your entire body. Health problems that you may have, or medication that you may be taking, could have an important interrelationship with the dentistry you will receive. Thank you for answering the following questions."
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Home Street Address</label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    placeholder="123 Main Street, Apt 4"
-                    className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">City</label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                    />
+                {/* Exact General Health Questions from Page 1 */}
+                <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-200 text-xs sm:text-sm">
+                  
+                  {/* Q1 */}
+                  <div className="py-2 border-b border-gray-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <span className="text-gray-800 font-medium">Are you under a physician's care now?</span>
+                      <div className="flex items-center gap-4 shrink-0">
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input type="radio" name="underPhysicianCare" value="yes" checked={formData.underPhysicianCare === 'yes'} onChange={handleChange} /> Yes
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input type="radio" name="underPhysicianCare" value="no" checked={formData.underPhysicianCare === 'no'} onChange={handleChange} /> No
+                        </label>
+                      </div>
+                    </div>
+                    {formData.underPhysicianCare === 'yes' && (
+                      <input
+                        type="text"
+                        name="underPhysicianCareExplain"
+                        value={formData.underPhysicianCareExplain}
+                        onChange={handleChange}
+                        placeholder="If yes, please explain physician name and reason for care..."
+                        className="w-full text-xs border border-blue-300 rounded-lg p-2 bg-blue-50/30 mt-2"
+                      />
+                    )}
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">State</label>
-                    <input
-                      type="text"
-                      name="state"
-                      value={formData.state}
-                      onChange={handleChange}
-                      className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">ZIP</label>
-                    <input
-                      type="text"
-                      name="zip"
-                      value={formData.zip}
-                      onChange={handleChange}
-                      className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                    />
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Emergency Contact Full Name</label>
-                    <input
-                      type="text"
-                      name="emergencyName"
-                      value={formData.emergencyName}
-                      onChange={handleChange}
-                      placeholder="e.g. Sarah Smith (Spouse/Parent)"
-                      className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                    />
+                  {/* Q2 */}
+                  <div className="py-2 border-b border-gray-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <span className="text-gray-800 font-medium">Have you ever been hospitalized or had a major operation?</span>
+                      <div className="flex items-center gap-4 shrink-0">
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input type="radio" name="hospitalizedOrOperation" value="yes" checked={formData.hospitalizedOrOperation === 'yes'} onChange={handleChange} /> Yes
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input type="radio" name="hospitalizedOrOperation" value="no" checked={formData.hospitalizedOrOperation === 'no'} onChange={handleChange} /> No
+                        </label>
+                      </div>
+                    </div>
+                    {formData.hospitalizedOrOperation === 'yes' && (
+                      <input
+                        type="text"
+                        name="hospitalizedOrOperationExplain"
+                        value={formData.hospitalizedOrOperationExplain}
+                        onChange={handleChange}
+                        placeholder="If yes, please explain procedure and approximate date..."
+                        className="w-full text-xs border border-blue-300 rounded-lg p-2 bg-blue-50/30 mt-2"
+                      />
+                    )}
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Emergency Contact Phone</label>
-                    <input
-                      type="tel"
-                      name="emergencyPhone"
-                      value={formData.emergencyPhone}
-                      onChange={handleChange}
-                      placeholder="(215) 555-0144"
-                      className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                    />
+
+                  {/* Q3 */}
+                  <div className="py-2 border-b border-gray-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <span className="text-gray-800 font-medium">Have you ever had a serious head or neck injury?</span>
+                      <div className="flex items-center gap-4 shrink-0">
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input type="radio" name="headNeckInjury" value="yes" checked={formData.headNeckInjury === 'yes'} onChange={handleChange} /> Yes
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input type="radio" name="headNeckInjury" value="no" checked={formData.headNeckInjury === 'no'} onChange={handleChange} /> No
+                        </label>
+                      </div>
+                    </div>
+                    {formData.headNeckInjury === 'yes' && (
+                      <input
+                        type="text"
+                        name="headNeckInjuryExplain"
+                        value={formData.headNeckInjuryExplain}
+                        onChange={handleChange}
+                        placeholder="If yes, please explain..."
+                        className="w-full text-xs border border-blue-300 rounded-lg p-2 bg-blue-50/30 mt-2"
+                      />
+                    )}
                   </div>
-                </div>
 
-                <div className="pt-2 border-t border-gray-100">
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Primary Reason for Visiting AllRight Dental *</label>
-                  <select
-                    name="dentalReason"
-                    value={formData.dentalReason}
-                    onChange={handleChange}
-                    className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                  >
-                    {DENTAL_REASONS.map(r => (
-                      <option key={r} value={r}>{r}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
+                  {/* Q4 */}
+                  <div className="py-2 border-b border-gray-100">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <span className="text-gray-800 font-medium">Are you taking any medications, pills, or drugs?</span>
+                      <div className="flex items-center gap-4 shrink-0">
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input type="radio" name="takingMedications" value="yes" checked={formData.takingMedications === 'yes'} onChange={handleChange} /> Yes
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input type="radio" name="takingMedications" value="no" checked={formData.takingMedications === 'no'} onChange={handleChange} /> No
+                        </label>
+                      </div>
+                    </div>
+                    {formData.takingMedications === 'yes' && (
+                      <input
+                        type="text"
+                        name="takingMedicationsExplain"
+                        value={formData.takingMedicationsExplain}
+                        onChange={handleChange}
+                        placeholder="If yes, please list all medications, dosages, blood thinners, etc..."
+                        className="w-full text-xs border border-blue-300 rounded-lg p-2 bg-blue-50/30 mt-2"
+                      />
+                    )}
+                  </div>
 
-            {/* STEP 2: MEDICAL HISTORY (EXACT MATCH TO CLINIC PAPER FORM PAGE 1) */}
-            {currentStep === 2 && (
-              <div className="space-y-6 animate-in fade-in">
-                <div className="border-b border-gray-100 pb-3">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <FaNotesMedical className="text-[#003BC4]" /> 2. Confidential Medical History
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Although dental personnel primarily treat the oral cavity, medical conditions and medications can directly impact dental safety, anesthesia, and recovery.
-                  </p>
-                </div>
-
-                {/* Yes/No General Health Questions */}
-                <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-gray-200/80 text-xs sm:text-sm">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-1 border-b border-gray-200">
-                    <span className="text-gray-700 font-medium">Are you currently under a physician's active care?</span>
-                    <div className="flex items-center gap-4">
+                  {/* Q5 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 border-b border-gray-100">
+                    <span className="text-gray-800 font-medium">Do you take, or have you taken, Phen-Fen or Redux?</span>
+                    <div className="flex items-center gap-4 shrink-0">
                       <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input type="radio" name="underPhysicianCare" value="yes" checked={formData.underPhysicianCare === 'yes'} onChange={handleChange} /> Yes
+                        <input type="radio" name="takenPhenFen" value="yes" checked={formData.takenPhenFen === 'yes'} onChange={handleChange} /> Yes
                       </label>
                       <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input type="radio" name="underPhysicianCare" value="no" checked={formData.underPhysicianCare === 'no'} onChange={handleChange} /> No
+                        <input type="radio" name="takenPhenFen" value="no" checked={formData.takenPhenFen === 'no'} onChange={handleChange} /> No
                       </label>
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-1 border-b border-gray-200">
-                    <span className="text-gray-700 font-medium">Have you ever been hospitalized or had a major surgical operation?</span>
-                    <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input type="radio" name="recentSurgery" value="yes" checked={formData.recentSurgery === 'yes'} onChange={handleChange} /> Yes
-                      </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input type="radio" name="recentSurgery" value="no" checked={formData.recentSurgery === 'no'} onChange={handleChange} /> No
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-1 border-b border-gray-200">
-                    <span className="text-gray-700 font-medium">Have you ever had a serious head or neck injury?</span>
-                    <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input type="radio" name="headNeckInjury" value="yes" checked={formData.headNeckInjury === 'yes'} onChange={handleChange} /> Yes
-                      </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input type="radio" name="headNeckInjury" value="no" checked={formData.headNeckInjury === 'no'} onChange={handleChange} /> No
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-1 border-b border-gray-200">
-                    <span className="text-gray-700 font-medium">Are you taking any prescription medications, pills, or blood thinners?</span>
-                    <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input type="radio" name="takingMedications" value="yes" checked={formData.takingMedications === 'yes'} onChange={handleChange} /> Yes
-                      </label>
-                      <label className="flex items-center gap-1.5 cursor-pointer">
-                        <input type="radio" name="takingMedications" value="no" checked={formData.takingMedications === 'no'} onChange={handleChange} /> No
-                      </label>
-                    </div>
-                  </div>
-                  {formData.takingMedications === 'yes' && (
-                    <input
-                      type="text"
-                      name="medicationsDetails"
-                      value={formData.medicationsDetails}
-                      onChange={handleChange}
-                      placeholder="Please list all current medications, dosages, or blood thinners..."
-                      className="w-full text-xs border border-blue-300 rounded-lg p-2 bg-white"
-                    />
-                  )}
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-1 border-b border-gray-200">
-                    <span className="text-gray-700 font-medium">Have you ever taken Fosamax, Boniva, Actonel, or bone density bisphosphonates?</span>
-                    <div className="flex items-center gap-4">
+                  {/* Q6 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 border-b border-gray-100">
+                    <span className="text-gray-800 font-medium">Have you ever taken Fosamax, Boniva, Actonel or any other medications containing bisphosphonates?</span>
+                    <div className="flex items-center gap-4 shrink-0">
                       <label className="flex items-center gap-1.5 cursor-pointer">
                         <input type="radio" name="takenBisphosphonates" value="yes" checked={formData.takenBisphosphonates === 'yes'} onChange={handleChange} /> Yes
                       </label>
@@ -652,9 +799,23 @@ export default function PatientForm() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-1">
-                    <span className="text-gray-700 font-medium">Do you smoke, vape, or use tobacco products?</span>
-                    <div className="flex items-center gap-4">
+                  {/* Q7 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 border-b border-gray-100">
+                    <span className="text-gray-800 font-medium">Are you on a special diet?</span>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="radio" name="specialDiet" value="yes" checked={formData.specialDiet === 'yes'} onChange={handleChange} /> Yes
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="radio" name="specialDiet" value="no" checked={formData.specialDiet === 'no'} onChange={handleChange} /> No
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Q8 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 border-b border-gray-100">
+                    <span className="text-gray-800 font-medium">Do you use tobacco?</span>
+                    <div className="flex items-center gap-4 shrink-0">
                       <label className="flex items-center gap-1.5 cursor-pointer">
                         <input type="radio" name="usesTobacco" value="yes" checked={formData.usesTobacco === 'yes'} onChange={handleChange} /> Yes
                       </label>
@@ -664,349 +825,562 @@ export default function PatientForm() {
                     </div>
                   </div>
 
+                  {/* Q9 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 border-b border-gray-100">
+                    <span className="text-gray-800 font-medium">Do you use controlled substances?</span>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="radio" name="usesControlledSubstances" value="yes" checked={formData.usesControlledSubstances === 'yes'} onChange={handleChange} /> Yes
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input type="radio" name="usesControlledSubstances" value="no" checked={formData.usesControlledSubstances === 'no'} onChange={handleChange} /> No
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Women Section */}
                   {formData.gender === 'female' && (
-                    <div className="pt-2 border-t border-gray-200">
-                      <p className="font-semibold text-gray-800 mb-1">Women Only:</p>
-                      <div className="flex flex-wrap gap-4">
-                        <label className="flex items-center gap-1.5 cursor-pointer">
-                          <input type="checkbox" name="isPregnant" checked={formData.isPregnant === 'yes'} onChange={(e) => setFormData(p => ({ ...p, isPregnant: e.target.checked ? 'yes' : 'no' }))} />
-                          Pregnant / Trying to get pregnant
-                        </label>
-                        <label className="flex items-center gap-1.5 cursor-pointer">
-                          <input type="checkbox" name="isNursing" checked={formData.isNursing === 'yes'} onChange={(e) => setFormData(p => ({ ...p, isNursing: e.target.checked ? 'yes' : 'no' }))} />
-                          Nursing
-                        </label>
+                    <div className="p-3 bg-rose-50/60 rounded-xl border border-rose-200 space-y-2 mt-2">
+                      <span className="font-bold text-rose-900 block text-xs">Women: Are you</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="flex items-center justify-between sm:justify-start gap-2">
+                          <span className="text-xs text-gray-700">Pregnant/Trying to get pregnant?</span>
+                          <div className="flex items-center gap-2">
+                            <label><input type="radio" name="isPregnant" value="yes" checked={formData.isPregnant === 'yes'} onChange={handleChange} /> Yes</label>
+                            <label><input type="radio" name="isPregnant" value="no" checked={formData.isPregnant === 'no'} onChange={handleChange} /> No</label>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between sm:justify-start gap-2">
+                          <span className="text-xs text-gray-700">Taking oral contraceptives?</span>
+                          <div className="flex items-center gap-2">
+                            <label><input type="radio" name="takingContraceptives" value="yes" checked={formData.takingContraceptives === 'yes'} onChange={handleChange} /> Yes</label>
+                            <label><input type="radio" name="takingContraceptives" value="no" checked={formData.takingContraceptives === 'no'} onChange={handleChange} /> No</label>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between sm:justify-start gap-2">
+                          <span className="text-xs text-gray-700">Nursing?</span>
+                          <div className="flex items-center gap-2">
+                            <label><input type="radio" name="isNursing" value="yes" checked={formData.isNursing === 'yes'} onChange={handleChange} /> Yes</label>
+                            <label><input type="radio" name="isNursing" value="no" checked={formData.isNursing === 'no'} onChange={handleChange} /> No</label>
+                          </div>
+                        </div>
                       </div>
+                    </div>
+                  )}
+
+                </div>
+
+                {/* Allergies Checklist (Exact from Paper Page 1) */}
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+                    Are you allergic to any of the following?
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                    {ALLERGIES_LIST.map(allergy => {
+                      const isChecked = formData.allergies.includes(allergy);
+                      return (
+                        <button
+                          key={allergy}
+                          type="button"
+                          onClick={() => handleArrayToggle('allergies', allergy)}
+                          className={`text-xs px-3 py-2 rounded-xl border text-left flex items-center justify-between transition ${
+                            isChecked
+                              ? "bg-red-50 border-red-400 text-red-800 font-bold"
+                              : "bg-white border-gray-200 text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          <span>{allergy}</span>
+                          {isChecked && <FaCheck className="text-red-600 text-xs" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="pt-2 border-t border-gray-200">
+                    <div className="flex items-center gap-4 mb-2">
+                      <span className="text-xs font-medium text-gray-700">Other Allergies?</span>
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                        <input type="radio" name="hasOtherAllergies" value="yes" checked={formData.hasOtherAllergies === 'yes'} onChange={handleChange} /> Yes
+                      </label>
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                        <input type="radio" name="hasOtherAllergies" value="no" checked={formData.hasOtherAllergies === 'no'} onChange={handleChange} /> No
+                      </label>
+                    </div>
+                    {formData.hasOtherAllergies === 'yes' && (
+                      <input
+                        type="text"
+                        name="otherAllergiesExplain"
+                        value={formData.otherAllergiesExplain}
+                        onChange={handleChange}
+                        placeholder="If yes, please explain other allergies..."
+                        className="w-full text-xs border border-gray-300 rounded-lg p-2 bg-white"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Exact 77 Conditions Grid (From Paper Page 1) */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-bold text-gray-900 uppercase tracking-wide">
+                      Do you have, or have you had, any of the following?
+                    </label>
+                    <span className="text-[11px] text-gray-500 font-medium">
+                      {formData.medicalConditions.length} selected
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-500 mb-2">Tap/click to select any conditions that apply to you:</p>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 max-h-64 overflow-y-auto p-2 bg-slate-50 border border-slate-200 rounded-xl">
+                    {MEDICAL_CONDITIONS_LIST.map(cond => {
+                      const isSelected = formData.medicalConditions.includes(cond);
+                      return (
+                        <button
+                          key={cond}
+                          type="button"
+                          onClick={() => handleArrayToggle('medicalConditions', cond)}
+                          className={`text-[11px] px-2 py-1.5 rounded-lg border text-left flex items-center justify-between transition leading-tight ${
+                            isSelected
+                              ? "bg-blue-100 border-[#003BC4] text-[#003BC4] font-bold shadow-2xs"
+                              : "bg-white border-gray-200 text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          <span className="truncate">{cond}</span>
+                          {isSelected && <span className="text-[#003BC4] font-bold text-xs ml-1 shrink-0">✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-3 mt-3 border-t border-gray-200 space-y-2">
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs font-medium text-gray-700">Have you ever had any serious illness not listed above?</span>
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                        <input type="radio" name="hasSeriousIllnessNotListed" value="yes" checked={formData.hasSeriousIllnessNotListed === 'yes'} onChange={handleChange} /> Yes
+                      </label>
+                      <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+                        <input type="radio" name="hasSeriousIllnessNotListed" value="no" checked={formData.hasSeriousIllnessNotListed === 'no'} onChange={handleChange} /> No
+                      </label>
+                    </div>
+                    {formData.hasSeriousIllnessNotListed === 'yes' && (
+                      <input
+                        type="text"
+                        name="seriousIllnessExplain"
+                        value={formData.seriousIllnessExplain}
+                        onChange={handleChange}
+                        placeholder="Please specify illness..."
+                        className="w-full text-xs border border-gray-300 rounded-lg p-2 bg-slate-50"
+                      />
+                    )}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Comments:</label>
+                      <textarea
+                        name="page1Comments"
+                        value={formData.page1Comments}
+                        onChange={handleChange}
+                        rows={2}
+                        placeholder="Any additional medical or dental notes for Doctor Shalini..."
+                        className="w-full text-xs border border-gray-300 rounded-lg p-2 bg-slate-50 focus:bg-white focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Page 1 Bottom Legal Certification & E-Signature */}
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-300 space-y-3">
+                  <p className="text-xs text-gray-700 leading-relaxed font-serif italic border-l-2 border-slate-600 pl-3">
+                    "To the best of my knowledge, the questions on this form have been accurately answered. I understand that providing incorrect information can be dangerous to my (or patient's) health. It is my responsibility to inform the dental office of any changes in medical status."
+                  </p>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-900 mb-1">
+                        SIGNATURE OF PATIENT, PARENT, or GUARDIAN *
+                      </label>
+                      <input
+                        type="text"
+                        name="page1Signature"
+                        value={formData.page1Signature}
+                        onChange={handleChange}
+                        placeholder="Type full legal name"
+                        required
+                        className="w-full text-sm font-semibold border-2 border-blue-400 rounded-xl px-3.5 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-900 mb-1">DATE *</label>
+                      <input
+                        type="date"
+                        name="page1SignatureDate"
+                        value={formData.page1SignatureDate}
+                        onChange={handleChange}
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2 bg-white focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* ============================================================== */}
+            {/* PAGE 2: HIPAA COMPLIANCE PATIENT CONSENT FORM (EXACT MATCH)   */}
+            {/* ============================================================== */}
+            {activePage === 2 && (
+              <div className="space-y-6 animate-in fade-in">
+                
+                {/* Form Page Header */}
+                <div className="border-b-2 border-slate-800 pb-3 text-center sm:text-left">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <div>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full">
+                        Form 2 of 3 • Paper Replica
+                      </span>
+                      <h2 className="text-2xl font-black text-gray-900 tracking-tight mt-1">HIPAA Compliance Patient Consent Form</h2>
+                    </div>
+                    <span className="text-xs text-gray-500 font-medium">AllRight Dental PC</span>
+                  </div>
+                </div>
+
+                {/* Exact Text from Paper Form Page 2 */}
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-300 text-xs sm:text-sm text-gray-800 space-y-3 leading-relaxed">
+                  <p>
+                    Our Notice of Privacy Practices provides information about how we may use or disclose protected health information.
+                  </p>
+                  <p>
+                    The notice contains a patients rights section describing your rights under the law. You ascertain that by your signature that you have reviewed our notice before signing this consent.
+                  </p>
+                  <p>
+                    The term of the notice may chance, if so, you will be notified at your next visit to update your signature/date.
+                  </p>
+                  <p>
+                    You have the right to restrict how your protected health information is used and disclosed for treatment, payment of healthcare operations. We are not required to after with this restriction, but if we do, we shall honor this agreement. The HIPAA (Health Insurance Portability and Accountability Act of 1996) law allows for the use of the information for treatment, payment, or healthcare operations.
+                  </p>
+                  <p>
+                    By signing this form, you consent to our use and disclosure of your protected healthcare information and potentially anonymous usage in a publication. You have the right to revoke this consent in writing, signed by you. However, such a revocation will not be retroactive.
+                  </p>
+
+                  <div className="pt-2 border-t border-slate-200">
+                    <p className="font-bold text-gray-900 mb-1.5">By signing this form, I understand that:</p>
+                    <ul className="list-disc list-inside space-y-1 text-gray-700 pl-1">
+                      <li>Protected health information may be disclosed or used for treatment, payment, or healthcare operations.</li>
+                      <li>The practice reserves the right to chance the privacy policy as allowed by the law.</li>
+                      <li>The patient has the right to revoke this consent in writing at any time and all full disclosures will then erase.</li>
+                      <li>The practice may condition receipt of treatable upon execution of this consent.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Family Discussion Permission (Exact from Paper Page 2) */}
+                <div className="bg-blue-50/80 p-5 rounded-2xl border border-blue-200 text-xs sm:text-sm space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <span className="font-bold text-blue-950">
+                      May we discuss your medical condition with any members of your family?
+                    </span>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-gray-800">
+                        <input type="radio" name="familyDiscussionConsent" value="yes" checked={formData.familyDiscussionConsent === 'yes'} onChange={handleChange} /> Yes
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-gray-800">
+                        <input type="radio" name="familyDiscussionConsent" value="no" checked={formData.familyDiscussionConsent === 'no'} onChange={handleChange} /> No
+                      </label>
+                    </div>
+                  </div>
+                  {formData.familyDiscussionConsent === 'yes' && (
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
+                        If YES, please name the members allowed:
+                      </label>
+                      <input
+                        type="text"
+                        name="familyMembersAllowed"
+                        value={formData.familyMembersAllowed}
+                        onChange={handleChange}
+                        placeholder="e.g. Spouse: Jane Doe, Mother: Mary Smith"
+                        className="w-full text-xs border border-blue-300 rounded-xl px-3 py-2 bg-white focus:outline-none"
+                      />
                     </div>
                   )}
                 </div>
 
-                {/* Allergies Checklist */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
-                    Are you allergic to any of the following? (Select all that apply)
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {ALLERGIES_LIST.map(a => (
-                      <button
-                        key={a}
-                        type="button"
-                        onClick={() => handleArrayToggle('allergies', a)}
-                        className={`text-xs px-3 py-2 rounded-xl border text-left flex items-center justify-between transition-all ${
-                          formData.allergies.includes(a)
-                            ? "bg-red-50 border-red-400 text-red-800 font-semibold"
-                            : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
-                        }`}
-                      >
-                        <span>{a}</span>
-                        {formData.allergies.includes(a) && <FaCheckCircle className="text-red-500 text-xs shrink-0" />}
-                      </button>
-                    ))}
+                {/* Emergency Contact Section (Exact from Paper Page 2) */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-gray-800 mb-3">
+                    Emergency Contact Information
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Emergency Contact Full Name *</label>
+                      <input
+                        type="text"
+                        name="emergencyContactName"
+                        value={formData.emergencyContactName}
+                        onChange={handleChange}
+                        placeholder="e.g. Sarah Smith (Spouse)"
+                        required
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2 focus:border-[#003BC4] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">Emergency Phone Number *</label>
+                      <input
+                        type="tel"
+                        name="emergencyContactPhone"
+                        value={formData.emergencyContactPhone}
+                        onChange={handleChange}
+                        placeholder="(215) 555-0144"
+                        required
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2 focus:border-[#003BC4] focus:outline-none"
+                      />
+                    </div>
                   </div>
-                  <input
-                    type="text"
-                    name="otherAllergies"
-                    value={formData.otherAllergies}
-                    onChange={handleChange}
-                    placeholder="Other allergies (food, metals, seasonal, dyes)..."
-                    className="w-full text-xs border border-gray-300 rounded-xl px-3.5 py-2 mt-2 focus:border-[#003BC4] focus:outline-none"
-                  />
                 </div>
 
-                {/* Medical Conditions Grid */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
-                    Do you have, or have you ever had, any of the following medical conditions?
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-56 overflow-y-auto p-1 bg-slate-50 border border-gray-200 rounded-2xl">
-                    {MEDICAL_CONDITIONS_LIST.map(cond => (
-                      <button
-                        key={cond}
-                        type="button"
-                        onClick={() => handleArrayToggle('medicalConditions', cond)}
-                        className={`text-xs px-3 py-2 rounded-xl border text-left flex items-center justify-between transition-all ${
-                          formData.medicalConditions.includes(cond)
-                            ? "bg-blue-100 border-[#003BC4] text-[#003BC4] font-semibold shadow-xs"
-                            : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
-                        }`}
-                      >
-                        <span className="truncate">{cond}</span>
-                        {formData.medicalConditions.includes(cond) && <FaCheckCircle className="text-[#003BC4] text-xs shrink-0 ml-1" />}
-                      </button>
-                    ))}
+                {/* Page 2 Signature Block (Exact from Paper Page 2) */}
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-300 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-900 mb-1">
+                        This consent was signed by: (PRINT NAME PLEASE) *
+                      </label>
+                      <input
+                        type="text"
+                        name="hipaaPrintedName"
+                        value={formData.hipaaPrintedName || `${formData.firstName} ${formData.lastName}`.trim()}
+                        onChange={handleChange}
+                        placeholder="Printed full name"
+                        required
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-900 mb-1">
+                        Signature: *
+                      </label>
+                      <input
+                        type="text"
+                        name="hipaaSignature"
+                        value={formData.hipaaSignature}
+                        onChange={handleChange}
+                        placeholder="Electronic signature"
+                        required
+                        className="w-full text-sm font-semibold border-2 border-blue-400 rounded-xl px-3 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-900 mb-1">Date: *</label>
+                      <input
+                        type="date"
+                        name="hipaaSignatureDate"
+                        value={formData.hipaaSignatureDate}
+                        onChange={handleChange}
+                        className="w-full text-sm border border-gray-300 rounded-xl px-3 py-2 bg-white focus:outline-none"
+                      />
+                    </div>
                   </div>
                 </div>
+
               </div>
             )}
 
-            {/* STEP 3: DENTAL INSURANCE & COVERAGE */}
-            {currentStep === 3 && (
+            {/* ========================================================================================= */}
+            {/* PAGE 3: CONSENT FOR TREATMENT & ASSIGNMENT OF INSURANCE BENEFITS (EXACT MATCH TO PAGE 3) */}
+            {/* ========================================================================================= */}
+            {activePage === 3 && (
               <div className="space-y-6 animate-in fade-in">
-                <div className="border-b border-gray-100 pb-3">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <FaIdCard className="text-[#003BC4]" /> 3. Dental Insurance & Coverage
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-1">
-                    AllRight Dental accepts most PPO plans and verifies benefits for $0 copay preventive cleanings.
-                  </p>
+                
+                {/* Official Clinic Letterhead (Exact replica of Page 3 top) */}
+                <div className="border-b-2 border-slate-800 pb-4 text-center">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full inline-block mb-1">
+                    Form 3 of 3 • Paper Replica
+                  </span>
+                  <h2 className="text-2xl font-black text-gray-900 tracking-tight">All Right Dental PC</h2>
+                  <p className="text-sm font-bold text-gray-700">229 Plaza Blvd. Ste #23</p>
+                  <p className="text-sm font-bold text-gray-700">Morrisville, PA 19067</p>
+                  <p className="text-sm font-bold text-blue-800">215-295-1348</p>
+
+                  <h3 className="text-lg sm:text-xl font-extrabold text-gray-900 mt-4 underline decoration-2">
+                    Consent for Treatment & Assignment of Insurance Benefits
+                  </h3>
                 </div>
 
-                <div className="bg-blue-50/80 p-4 rounded-2xl border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <span className="text-xs sm:text-sm font-semibold text-blue-950">Will you be using Dental Insurance for your visit?</span>
-                  <div className="flex items-center gap-4 text-xs sm:text-sm">
-                    <label className="flex items-center gap-1.5 cursor-pointer font-medium text-gray-800">
-                      <input type="radio" name="hasInsurance" value="yes" checked={formData.hasInsurance === 'yes'} onChange={handleChange} /> Yes (Insured)
-                    </label>
-                    <label className="flex items-center gap-1.5 cursor-pointer font-medium text-gray-800">
-                      <input type="radio" name="hasInsurance" value="no" checked={formData.hasInsurance === 'no'} onChange={handleChange} /> No (Self-Pay / CareCredit)
-                    </label>
+                {/* Exact Text from Paper Page 3 */}
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-300 text-xs sm:text-sm text-gray-800 space-y-3 leading-relaxed">
+                  <p>
+                    The undersigned hereby authorize All Right Dental PC to take X-rays, study models, photographs or any other diagnostic aids deemed appropriate by the Doctor to make a thorough diagnosis for my dental needs. I also authorize the Doctor to perform any and all forms of treatment, prescribe medication and therapy that may be indicated. I also understand the use of anesthetic agents embodies a certain risk. I understand that All Right Dental PC will submit a claim to my dental insurance for all services rendered. Any balance that is not covered by my dental insurance will be my financial responsibility. You have the right to ask for a Pre-treatment estimate is sent to my insurance for clarification of benefits prior to start of treatment.
+                  </p>
+
+                  {/* Highlighted Policy Fees (Exact as emphasized on paper Page 3) */}
+                  <div className="bg-white p-4 rounded-xl border-2 border-slate-400 space-y-2 my-2">
+                    <p className="font-bold text-gray-900 text-xs sm:text-sm underline">
+                      For ANY medical release records ( X-rays) there will be a fee of $50.00.
+                    </p>
+                    <p className="font-bold text-red-700 text-xs sm:text-sm underline">
+                      For ANY cancellation fee less than 24 hours prior to appointment there will be a fee of $25.00
+                    </p>
                   </div>
                 </div>
 
-                {formData.hasInsurance === 'yes' ? (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">Primary Dental Insurance Payer *</label>
-                      <select
-                        name="insuranceProvider"
-                        value={formData.insuranceProvider}
-                        onChange={handleChange}
-                        className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                      >
-                        {US_DENTAL_INSURANCES.map(ins => (
-                          <option key={ins} value={ins}>{ins}</option>
-                        ))}
-                      </select>
+                {/* Insurance Details Section (Feeds the Assignment of Benefits) */}
+                <div className="bg-blue-50/70 p-4 rounded-2xl border border-blue-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <span className="text-xs font-bold text-blue-950 uppercase tracking-wide">
+                      Dental Insurance Information (For Claims & Assignment)
+                    </span>
+                    <div className="flex items-center gap-3 text-xs">
+                      <label className="flex items-center gap-1 cursor-pointer">
+                        <input type="radio" name="hasInsurance" value="yes" checked={formData.hasInsurance === 'yes'} onChange={handleChange} /> Insured
+                      </label>
+                      <label className="flex items-center gap-1 cursor-pointer">
+                        <input type="radio" name="hasInsurance" value="no" checked={formData.hasInsurance === 'no'} onChange={handleChange} /> Self-Pay
+                      </label>
                     </div>
+                  </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {formData.hasInsurance === 'yes' ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Member / Subscriber ID # *</label>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1">Insurance Provider</label>
+                        <select
+                          name="insuranceProvider"
+                          value={formData.insuranceProvider}
+                          onChange={handleChange}
+                          className="w-full text-xs border border-gray-300 rounded-lg p-2 bg-white focus:outline-none"
+                        >
+                          {US_DENTAL_INSURANCES.map(ins => (
+                            <option key={ins} value={ins}>{ins}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1">Member / Subscriber ID #</label>
                         <input
                           type="text"
                           name="subscriberId"
                           value={formData.subscriberId}
                           onChange={handleChange}
-                          placeholder="e.g. 104928342"
-                          className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
+                          placeholder="e.g. 102938475"
+                          className="w-full text-xs border border-gray-300 rounded-lg p-2 bg-white focus:outline-none"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Group Number</label>
+                        <label className="block text-[11px] font-semibold text-gray-700 mb-1">Group Number</label>
                         <input
                           type="text"
                           name="groupNumber"
                           value={formData.groupNumber}
                           onChange={handleChange}
-                          placeholder="e.g. GRP-9821"
-                          className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
+                          placeholder="e.g. GRP-4821"
+                          className="w-full text-xs border border-gray-300 rounded-lg p-2 bg-white focus:outline-none"
                         />
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Policyholder / Subscriber Name</label>
-                        <input
-                          type="text"
-                          name="policyHolderName"
-                          value={formData.policyHolderName || `${formData.firstName} ${formData.lastName}`}
-                          onChange={handleChange}
-                          placeholder="Full name on insurance card"
-                          className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Relationship to Patient</label>
-                        <select
-                          name="policyHolderRelationship"
-                          value={formData.policyHolderRelationship}
-                          onChange={handleChange}
-                          className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                        >
-                          <option value="Self">Self</option>
-                          <option value="Spouse">Spouse</option>
-                          <option value="Child">Child</option>
-                          <option value="Guardian">Legal Guardian</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-1">Policyholder Date of Birth</label>
-                        <input
-                          type="date"
-                          name="policyHolderDob"
-                          value={formData.policyHolderDob || formData.dob}
-                          onChange={handleChange}
-                          className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs sm:text-sm text-emerald-900">
-                    <p className="font-bold mb-1">No Insurance? No Problem!</p>
-                    <p className="leading-relaxed">
-                      AllRight Dental offers clear upfront pricing and participates with CareCredit for 0% interest monthly payment plans. Doctor Shalini Mandapatti will review all treatment options prior to care.
+                  ) : (
+                    <p className="text-xs text-gray-600 italic">
+                      Self-pay patient. Payment due at time of service (CareCredit accepted).
                     </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* STEP 4: HIPAA COMPLIANCE, TREATMENT CONSENT & DIGITAL SIGNATURE */}
-            {currentStep === 4 && (
-              <div className="space-y-6 animate-in fade-in">
-                <div className="border-b border-gray-100 pb-3">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <FaFileContract className="text-[#003BC4]" /> 4. HIPAA Consent & Treatment Authorization
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Exact legal provisions as required by federal HIPAA privacy laws and Pennsylvania Dental Board regulations.
-                  </p>
-                </div>
-
-                {/* HIPAA Privacy Notice Box */}
-                <div className="bg-slate-50 border border-gray-200 rounded-2xl p-4 text-xs text-gray-700 max-h-48 overflow-y-auto space-y-2 leading-relaxed">
-                  <p className="font-bold text-gray-900">Notice of Privacy Practices & HIPAA Compliance (45 CFR § 164.520):</p>
-                  <p>
-                    AllRight Dental PC is dedicated to safeguarding your protected health information (PHI). We use bank-grade AES-256 encryption and follow strict HIPAA Security Rules. By signing below, you consent to the use and disclosure of your protected health information for treatment, billing, insurance claims, and healthcare operations. You have the right to request restrictions on disclosures or review your records at any time.
-                  </p>
-                  <p className="font-bold text-gray-900 pt-1">Consent for Treatment & Assignment of Benefits:</p>
-                  <p>
-                    The undersigned hereby authorizes AllRight Dental PC and Doctor Shalini Mandapatti, DDS to perform dental examinations, take digital X-rays, study models, photographs, and diagnostic aids, and perform necessary dental therapies with local anesthesia. I authorize direct payment of dental benefits to AllRight Dental PC. I understand that I am financially responsible for any charges not covered by my dental insurance.
-                  </p>
-                  <p className="text-gray-500 text-[11px] pt-1 border-t border-gray-200">
-                    * Practice Policy: Medical release records/X-ray duplication fee is $50.00. Late cancellation fee for cancellations made less than 24 hours prior to appointment is $25.00.
-                  </p>
-                </div>
-
-                {/* Family Discussion Consent */}
-                <div className="p-4 bg-blue-50/70 border border-blue-100 rounded-2xl text-xs sm:text-sm space-y-2">
-                  <label className="font-semibold text-gray-800 block">
-                    May we discuss your medical / dental condition with designated family members?
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input type="radio" name="familyDiscussionConsent" value="yes" checked={formData.familyDiscussionConsent === 'yes'} onChange={handleChange} /> Yes
-                    </label>
-                    <label className="flex items-center gap-1.5 cursor-pointer">
-                      <input type="radio" name="familyDiscussionConsent" value="no" checked={formData.familyDiscussionConsent === 'no'} onChange={handleChange} /> No
-                    </label>
-                  </div>
-                  {formData.familyDiscussionConsent === 'yes' && (
-                    <input
-                      type="text"
-                      name="familyMembersAllowed"
-                      value={formData.familyMembersAllowed}
-                      onChange={handleChange}
-                      placeholder="Enter allowed family member names and relationship..."
-                      className="w-full text-xs border border-blue-300 rounded-xl p-2 bg-white mt-1"
-                    />
                   )}
                 </div>
 
-                {/* Mandatory Checkboxes */}
-                <div className="space-y-3 pt-1 text-xs sm:text-sm">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="agreeHipaaPrivacy"
-                      checked={formData.agreeHipaaPrivacy}
-                      onChange={handleChange}
-                      className="mt-1 w-4 h-4 text-[#003BC4] rounded border-gray-300 focus:ring-0 cursor-pointer"
-                    />
-                    <span className="text-gray-700">
-                      <strong>I have reviewed and acknowledge the HIPAA Notice of Privacy Practices</strong> and consent to the use of my health information for treatment and billing operations.
-                    </span>
-                  </label>
-
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="agreeTreatmentConsent"
-                      checked={formData.agreeTreatmentConsent}
-                      onChange={handleChange}
-                      className="mt-1 w-4 h-4 text-[#003BC4] rounded border-gray-300 focus:ring-0 cursor-pointer"
-                    />
-                    <span className="text-gray-700">
-                      <strong>I authorize Doctor Shalini Mandapatti, DDS</strong> to perform dental exams, diagnostic X-rays, and recommended treatment.
-                    </span>
-                  </label>
-
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="agreeAssignmentBenefits"
-                      checked={formData.agreeAssignmentBenefits}
-                      onChange={handleChange}
-                      className="mt-1 w-4 h-4 text-[#003BC4] rounded border-gray-300 focus:ring-0 cursor-pointer"
-                    />
-                    <span className="text-gray-700">
-                      <strong>I agree to the Assignment of Insurance Benefits</strong> and understand I am responsible for copays and balances not covered by insurance.
-                    </span>
-                  </label>
-                </div>
-
-                {/* Digital Signature Field */}
-                <div className="p-5 bg-gradient-to-r from-blue-50 to-emerald-50 rounded-2xl border border-blue-200 space-y-3">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-blue-900 flex items-center gap-2">
-                    <FaSignature className="text-[#003BC4] text-base" /> Legal Electronic Signature *
-                  </label>
-                  <p className="text-xs text-gray-600">
-                    Type your full legal name below. By typing your name, you acknowledge this digital signature carries the same legal validity as a handwritten signature under the federal ESIGN Act (15 U.S.C. § 7001).
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <input
-                        type="text"
-                        name="typedSignature"
-                        value={formData.typedSignature}
-                        onChange={handleChange}
-                        placeholder="e.g. Piyush Junghare"
-                        required
-                        className="w-full text-sm font-semibold border-2 border-blue-300 rounded-xl px-4 py-2.5 focus:border-[#003BC4] focus:outline-none bg-white"
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="date"
-                        name="signatureDate"
-                        value={formData.signatureDate}
-                        onChange={handleChange}
-                        className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2.5 focus:border-[#003BC4] focus:outline-none bg-white"
-                      />
+                {/* Two Separate Legal Signature Blocks (Exact from Paper Page 3) */}
+                <div className="space-y-4">
+                  
+                  {/* Signature 1: Consent for Treatment */}
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-300 space-y-2">
+                    <p className="text-xs sm:text-sm font-bold text-gray-900">
+                      By signing you are agreeing with consent for Treatment.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">
+                          X (Patient / Guardian Signature) *
+                        </label>
+                        <input
+                          type="text"
+                          name="treatmentConsentSignature"
+                          value={formData.treatmentConsentSignature}
+                          onChange={handleChange}
+                          placeholder="Type full legal name as signature"
+                          required
+                          className="w-full text-sm font-semibold border-2 border-blue-400 rounded-xl px-3.5 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Date: *</label>
+                        <input
+                          type="date"
+                          name="treatmentConsentDate"
+                          value={formData.treatmentConsentDate}
+                          onChange={handleChange}
+                          className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2 bg-white focus:outline-none"
+                        />
+                      </div>
                     </div>
                   </div>
+
+                  {/* Signature 2: Assignment of Benefits */}
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-300 space-y-2">
+                    <p className="text-xs sm:text-sm font-bold text-gray-900">
+                      By signing you are agreeing to assignment of Benefits.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">
+                          X (Patient / Policyholder Signature) *
+                        </label>
+                        <input
+                          type="text"
+                          name="benefitsAssignmentSignature"
+                          value={formData.benefitsAssignmentSignature}
+                          onChange={handleChange}
+                          placeholder="Type full legal name as signature"
+                          required
+                          className="w-full text-sm font-semibold border-2 border-blue-400 rounded-xl px-3.5 py-2 bg-white focus:border-[#003BC4] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">Date: *</label>
+                        <input
+                          type="date"
+                          name="benefitsAssignmentDate"
+                          value={formData.benefitsAssignmentDate}
+                          onChange={handleChange}
+                          className="w-full text-sm border border-gray-300 rounded-xl px-3.5 py-2 bg-white focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
+
               </div>
             )}
 
             {/* Stepper Navigation Buttons */}
-            <div className="flex items-center justify-between pt-6 border-t border-gray-100 mt-6">
-              {currentStep > 1 ? (
+            <div className="flex items-center justify-between pt-6 border-t border-slate-200 mt-6">
+              {activePage > 1 ? (
                 <button
                   type="button"
-                  onClick={handlePrev}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-gray-600 hover:bg-gray-100 transition"
+                  onClick={handlePrevPage}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition"
                 >
-                  <FaArrowLeft /> Back
+                  <FaArrowLeft /> Previous Form Page
                 </button>
               ) : <div></div>}
 
-              {currentStep < 4 ? (
+              {activePage < 3 ? (
                 <button
                   type="button"
-                  onClick={handleNext}
+                  onClick={handleNextPage}
                   className="flex items-center gap-2 bg-[#003BC4] hover:bg-[#002FA0] text-white px-7 py-3 rounded-full text-xs sm:text-sm font-bold shadow-md transition"
                 >
-                  Continue <FaArrowRight />
+                  Save & Go to Form Page {activePage + 1} <FaArrowRight />
                 </button>
               ) : (
                 <button
                   type="submit"
-                  className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white px-8 py-3.5 rounded-full text-sm font-extrabold shadow-lg transition active:scale-95"
+                  className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:opacity-95 text-white px-8 py-3.5 rounded-full text-sm font-extrabold shadow-lg transition active:scale-95"
                 >
-                  <FaCheckCircle /> Complete & Submit Digital Intake
+                  <FaCheckCircle /> Complete & Submit Official 3-Page Intake
                 </button>
               )}
             </div>
