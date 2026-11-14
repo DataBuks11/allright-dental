@@ -12,7 +12,9 @@ import {
   FaExternalLinkAlt,
   FaArrowRight,
   FaCheckCircle,
-  FaRegClock
+  FaRegClock,
+  FaCalendarAlt,
+  FaUserInjured
 } from "react-icons/fa";
 
 export default function ModernDashboard() {
@@ -215,12 +217,11 @@ export default function ModernDashboard() {
         </div>
       </div>
 
-      {/* 3. Main Dashboard Layout (8 Cols Left / 4 Cols Right) */}
+      {/* 3. ROW 1 (TOP SECTION): Chart Card (8 cols) + Appointment Calendar (4 cols) -> EXACT SAME HEIGHT */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch w-full">
-        {/* ================= LEFT SECTION (8 Cols) ================= */}
-        <div className="lg:col-span-8 flex flex-col justify-between gap-4 sm:gap-5">
-          {/* A. "Your Patients Today" Analytics & Line Chart Card */}
-          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs">
+        {/* Left: "Your Patients Today" Analytics & Line Chart Card */}
+        <div className="lg:col-span-8 bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex flex-col justify-between h-full">
+          <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100">
               <h2 className="text-sm sm:text-base font-bold text-slate-900">
                 Your patients today
@@ -364,139 +365,11 @@ export default function ModernDashboard() {
               </div>
             </div>
           </div>
-
-          {/* B. Bottom Grid (Events Card + Patients Today Roster Card) - Equal 3 Items Each! */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 flex-1">
-            {/* Card 1: Events */}
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex flex-col justify-between h-full">
-              <div>
-                <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-900">Events</h3>
-                  <button
-                    type="button"
-                    className="text-slate-400 hover:text-slate-700 text-sm cursor-pointer"
-                    aria-label="Events Menu"
-                  >
-                    <FaEllipsisH />
-                  </button>
-                </div>
-
-                <div className="mt-3 space-y-3">
-                  {events.map((evt) => (
-                    <div
-                      key={evt.id}
-                      className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors"
-                    >
-                      <div>
-                        <p className="text-xs font-bold text-slate-800 leading-tight">
-                          {evt.title}
-                        </p>
-                        <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                          {evt.time}
-                        </p>
-
-                        {/* Real Staff Badges: Doctor Shalini Real Face Avatar + RDH + DA */}
-                        <div className="flex items-center -space-x-1 mt-1.5">
-                          <img
-                            src="/drShaliniAvatar.jpg"
-                            alt="Doctor Shalini"
-                            className="w-5 h-5 rounded-full object-cover ring-1 ring-white"
-                          />
-                          <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold text-[8px] flex items-center justify-center ring-1 ring-white">
-                            RDH
-                          </div>
-                          <div className="w-5 h-5 rounded-full bg-teal-100 text-teal-700 font-bold text-[8px] flex items-center justify-center ring-1 ring-white">
-                            DA
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Purple / Blue Toggle Switch */}
-                      <button
-                        type="button"
-                        onClick={() => toggleEvent(evt.id)}
-                        className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer focus:outline-none p-0.5 ${
-                          evt.active ? "bg-[#003BC4]" : "bg-slate-200"
-                        }`}
-                        aria-label="Toggle Event"
-                      >
-                        <span
-                          className={`block w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${
-                            evt.active ? "translate-x-5" : "translate-x-0"
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Card 2: Your Patients Today (Roster) - Clinical Initials Badges (Zero Stock Images) */}
-            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex flex-col justify-between h-full">
-              <div>
-                <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-900">Your patients today</h3>
-                  <Link
-                    to="/admin/appointments"
-                    className="text-xs font-semibold text-[#003BC4] hover:underline flex items-center gap-1"
-                  >
-                    <span>All</span>
-                    <FaArrowRight className="text-[9px]" />
-                  </Link>
-                </div>
-
-                <div className="mt-3 space-y-3">
-                  {patientsToday.map((pt) => (
-                    <div
-                      key={pt.id}
-                      className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        {/* Clinical EHR Initials Badge */}
-                        <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${pt.initialsStyle}`}
-                        >
-                          {pt.initials}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-800 truncate leading-tight">
-                            {pt.name}
-                          </p>
-                          <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
-                            {pt.diagnosis}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0 pl-2">
-                        <span className="text-[11px] font-bold text-slate-600 font-mono block">
-                          {pt.time}
-                        </span>
-                        <span
-                          className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full inline-block mt-0.5 ${
-                            pt.status === "Checked In"
-                              ? "bg-emerald-50 text-emerald-700"
-                              : pt.status === "In Treatment"
-                              ? "bg-blue-50 text-[#003BC4]"
-                              : "bg-slate-100 text-slate-600"
-                          }`}
-                        >
-                          {pt.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* ================= RIGHT SECTION (4 Cols) ================= */}
-        <div className="lg:col-span-4 flex flex-col justify-between gap-4 sm:gap-5">
-          {/* Widget 1: Appointment Mini Calendar Widget */}
-          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs">
+        {/* Right: "Appointment" Mini Calendar Widget (Matches Row 1 Height Cleanly) */}
+        <div className="lg:col-span-4 bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex flex-col justify-between h-full">
+          <div>
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <h3 className="text-sm font-bold text-slate-900">Appointment</h3>
               <button
@@ -509,7 +382,7 @@ export default function ModernDashboard() {
             </div>
 
             {/* Month Navigator */}
-            <div className="flex items-center justify-between mt-2.5 px-1">
+            <div className="flex items-center justify-between mt-3 px-1">
               <button
                 type="button"
                 className="w-6 h-6 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-pointer"
@@ -530,7 +403,7 @@ export default function ModernDashboard() {
             </div>
 
             {/* Days Row & Date Numbers (Wed Nov 18 Highlighted with Circle) */}
-            <div className="grid grid-cols-7 gap-1 mt-2.5 text-center">
+            <div className="grid grid-cols-7 gap-1 mt-3 text-center">
               <span className="text-[10px] font-semibold text-slate-400">Sun</span>
               <span className="text-[10px] font-semibold text-slate-400">Mon</span>
               <span className="text-[10px] font-semibold text-slate-400">Tue</span>
@@ -540,103 +413,233 @@ export default function ModernDashboard() {
               <span className="text-[10px] font-bold text-amber-600">Sat</span>
 
               {/* Date Numbers */}
-              <span className="text-xs font-medium text-slate-400 py-1">15</span>
-              <span className="text-xs font-medium text-slate-400 py-1">16</span>
-              <span className="text-xs font-medium text-slate-400 py-1">17</span>
+              <span className="text-xs font-medium text-slate-400 py-1.5">15</span>
+              <span className="text-xs font-medium text-slate-400 py-1.5">16</span>
+              <span className="text-xs font-medium text-slate-400 py-1.5">17</span>
               {/* Active Day 18 (Wednesday) Highlighted with Mockup Circle */}
-              <div className="flex items-center justify-center py-0.5">
+              <div className="flex items-center justify-center py-1">
                 <span className="w-6 h-6 rounded-full bg-[#003BC4] text-white text-xs font-bold flex items-center justify-center shadow-xs">
                   18
                 </span>
               </div>
-              <span className="text-xs font-bold text-slate-800 py-1">19</span>
-              <span className="text-xs font-bold text-slate-800 py-1">20</span>
-              <span className="text-xs font-bold text-amber-700 py-1">21</span>
-            </div>
-
-            {/* Practice Schedule Indicator (Balances Row 1 Height) */}
-            <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-              <span className="flex items-center gap-1 font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                <FaCheckCircle className="text-[10px]" /> Operatory 1 & 2 Active
-              </span>
-              <span className="font-mono text-slate-400 text-[10px]">
-                4 Appts Today
-              </span>
+              <span className="text-xs font-bold text-slate-800 py-1.5">19</span>
+              <span className="text-xs font-bold text-slate-800 py-1.5">20</span>
+              <span className="text-xs font-bold text-amber-700 py-1.5">21</span>
             </div>
           </div>
 
-          {/* Widget 2: Featured Attending Doctor Card (Doctor Shalini Mandapatti, DDS) */}
-          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex-1 flex flex-col justify-between h-full">
+          {/* Today's Operatory & Clinical Load Summary Pill */}
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+            <span className="flex items-center gap-1.5 font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              <FaCheckCircle className="text-[10px]" /> Operatory 1 & 2 Live
+            </span>
+            <span className="font-mono text-slate-600 text-[11px] font-bold">
+              4 Appts Today
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. ROW 2 (BOTTOM SECTION): [Events + Patients Today] (8 cols) + [Upcoming Doctor] (4 cols) -> EXACT SAME HEIGHT */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch w-full">
+        {/* Left: Events Card + Patients Today Card (8 cols) */}
+        <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 h-full">
+          {/* Card 1: Events */}
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex flex-col justify-between h-full">
             <div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Upcoming Doctor
-                </span>
-                <Link
-                  to="/admin/schedule"
-                  className="text-slate-400 hover:text-[#003BC4] text-xs transition-colors"
-                  title="View Doctor Schedule"
+              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                <h3 className="text-sm font-bold text-slate-900">Events</h3>
+                <button
+                  type="button"
+                  className="text-slate-400 hover:text-slate-700 text-sm cursor-pointer"
+                  aria-label="Events Menu"
                 >
-                  <FaExternalLinkAlt />
+                  <FaEllipsisH />
+                </button>
+              </div>
+
+              <div className="mt-3.5 space-y-3.5">
+                {events.map((evt) => (
+                  <div
+                    key={evt.id}
+                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors"
+                  >
+                    <div>
+                      <p className="text-xs font-bold text-slate-800 leading-tight">
+                        {evt.title}
+                      </p>
+                      <p className="text-[11px] text-slate-400 font-medium mt-1">
+                        {evt.time}
+                      </p>
+
+                      {/* Real Staff Badges: Doctor Shalini Real Face Avatar + RDH + DA */}
+                      <div className="flex items-center -space-x-1 mt-2">
+                        <img
+                          src="/drShaliniAvatar.jpg"
+                          alt="Doctor Shalini"
+                          className="w-5 h-5 rounded-full object-cover ring-1 ring-white"
+                        />
+                        <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold text-[8px] flex items-center justify-center ring-1 ring-white">
+                          RDH
+                        </div>
+                        <div className="w-5 h-5 rounded-full bg-teal-100 text-teal-700 font-bold text-[8px] flex items-center justify-center ring-1 ring-white">
+                          DA
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Purple / Blue Toggle Switch */}
+                    <button
+                      type="button"
+                      onClick={() => toggleEvent(evt.id)}
+                      className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer focus:outline-none p-0.5 ${
+                        evt.active ? "bg-[#003BC4]" : "bg-slate-200"
+                      }`}
+                      aria-label="Toggle Event"
+                    >
+                      <span
+                        className={`block w-4 h-4 rounded-full bg-white shadow-xs transition-transform ${
+                          evt.active ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Your Patients Today (Roster) - Clinical Initials Badges */}
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex flex-col justify-between h-full">
+            <div>
+              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                <h3 className="text-sm font-bold text-slate-900">Your patients today</h3>
+                <Link
+                  to="/admin/appointments"
+                  className="text-xs font-semibold text-[#003BC4] hover:underline flex items-center gap-1"
+                >
+                  <span>All</span>
+                  <FaArrowRight className="text-[9px]" />
                 </Link>
               </div>
 
-              <h3 className="text-base font-extrabold text-slate-900 mt-1 leading-tight">
-                Doctor Shalini Mandapatti
-              </h3>
+              <div className="mt-3.5 space-y-3.5">
+                {patientsToday.map((pt) => (
+                  <div
+                    key={pt.id}
+                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {/* Clinical EHR Initials Badge */}
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${pt.initialsStyle}`}
+                      >
+                        {pt.initials}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-800 truncate leading-tight">
+                          {pt.name}
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-medium truncate mt-1">
+                          {pt.diagnosis}
+                        </p>
+                      </div>
+                    </div>
 
-              <div className="mt-1">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#003BC4] border border-blue-200/80">
-                  <FaTooth className="text-[9px]" /> Lead Cosmetic & Family Dentist
-                </span>
+                    <div className="text-right shrink-0 pl-2">
+                      <span className="text-[11px] font-bold text-slate-600 font-mono block">
+                        {pt.time}
+                      </span>
+                      <span
+                        className={`text-[9px] font-bold px-2 py-0.5 rounded-full inline-block mt-1 ${
+                          pt.status === "Checked In"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : pt.status === "In Treatment"
+                            ? "bg-blue-50 text-[#003BC4]"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {pt.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
+            </div>
+          </div>
+        </div>
 
-              {/* SOLO Centered Portrait of Doctor Shalini (Head, Face, Smile, Doctor Coat - ZERO Cut-Off!) */}
-              <div className="relative mt-3 rounded-2xl overflow-hidden border border-slate-100 shadow-xs bg-slate-50">
-                <img
-                  src="/drShaliniCard.jpg"
-                  alt="Doctor Shalini Mandapatti, DDS"
-                  className="w-full h-44 sm:h-48 object-cover object-top"
-                  onError={(e) => {
-                    e.target.src = "/drShaliniUpdate.jpg";
-                  }}
-                />
-                <div className="absolute bottom-2 right-2 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-800 shadow-2xs border border-white/60">
-                  15+ Yrs Exp
-                </div>
-              </div>
+        {/* Right: Featured Attending Doctor Card (4 cols) -> Exact Height Match with Events/Patients */}
+        <div className="lg:col-span-4 bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex flex-col justify-between h-full">
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                Upcoming Doctor
+              </span>
+              <Link
+                to="/admin/schedule"
+                className="text-slate-400 hover:text-[#003BC4] text-xs transition-colors"
+                title="View Doctor Schedule"
+              >
+                <FaExternalLinkAlt />
+              </Link>
+            </div>
 
-              {/* About Doctor Shalini */}
-              <div className="mt-2.5">
-                <p className="text-xs font-bold text-slate-800">About Doctor Shalini</p>
-                <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
-                  Doctor Shalini provides compassionate care expertise ensuring patient health and restorative excellence...{" "}
-                  <Link to="/about-us" className="text-[#003BC4] font-semibold cursor-pointer hover:underline">
-                    Read More
-                  </Link>
-                </p>
-              </div>
+            <h3 className="text-base font-extrabold text-slate-900 mt-1 leading-tight">
+              Doctor Shalini Mandapatti
+            </h3>
 
-              {/* Info Row: Timing & Consultation Duration */}
-              <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-100 text-[11px] text-slate-600">
-                <span className="flex items-center gap-1 font-semibold text-slate-700">
-                  <FaRegClock className="text-slate-400 text-xs" /> Wed - Sat Open
-                </span>
-                <span className="flex items-center gap-1 font-medium text-slate-500">
-                  ⏱️ 30 - 45 min
-                </span>
+            <div className="mt-1">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#003BC4] border border-blue-200/80">
+                <FaTooth className="text-[9px]" /> Lead Cosmetic & Family Dentist
+              </span>
+            </div>
+
+            {/* Perfect Proportional Solo Portrait: Head, Face, Smile, Doctor Coat All 100% Visible */}
+            <div className="relative mt-3 rounded-2xl overflow-hidden border border-slate-100 shadow-xs bg-slate-50 aspect-[16/10]">
+              <img
+                src="/drShaliniCard.jpg"
+                alt="Doctor Shalini Mandapatti, DDS"
+                className="w-full h-full object-cover object-center"
+                onError={(e) => {
+                  e.target.src = "/drShaliniUpdate.jpg";
+                }}
+              />
+              <div className="absolute bottom-2 right-2 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-800 shadow-2xs border border-white/60">
+                15+ Yrs Exp
               </div>
             </div>
 
-            {/* Mockup Pill Action Button */}
-            <Link
-              to="/admin/schedule"
-              className="mt-3 w-full py-2.5 px-4 bg-[#0B132B] hover:bg-[#003BC4] text-white font-bold rounded-full shadow-sm text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer"
-            >
-              <FaCalendarCheck className="text-xs" />
-              <span>Manage Clinic Schedule</span>
-            </Link>
+            {/* About Doctor Shalini */}
+            <div className="mt-2.5">
+              <p className="text-xs font-bold text-slate-800">About Doctor Shalini</p>
+              <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
+                Doctor Shalini provides compassionate care expertise ensuring patient health and restorative excellence...{" "}
+                <Link to="/about-doctor" className="text-[#003BC4] font-semibold cursor-pointer hover:underline">
+                  Read More
+                </Link>
+              </p>
+            </div>
+
+            {/* Info Row: Timing & Consultation Duration */}
+            <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-100 text-[11px] text-slate-600">
+              <span className="flex items-center gap-1 font-semibold text-slate-700">
+                <FaRegClock className="text-slate-400 text-xs" /> Wed - Sat Open
+              </span>
+              <span className="flex items-center gap-1 font-medium text-slate-500">
+                ⏱️ 30 - 45 min
+              </span>
+            </div>
           </div>
+
+          {/* Action Button */}
+          <Link
+            to="/admin/schedule"
+            className="mt-3 w-full py-2.5 px-4 bg-[#0B132B] hover:bg-[#003BC4] text-white font-bold rounded-full shadow-sm text-xs text-center flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            <FaCalendarCheck className="text-xs" />
+            <span>Manage Clinic Schedule</span>
+          </Link>
         </div>
       </div>
     </div>
