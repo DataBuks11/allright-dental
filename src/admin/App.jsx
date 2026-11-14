@@ -54,7 +54,7 @@ function AdminAppContent() {
           toggleSidebar={handleToggleSidebar}
           isSidebarExpanded={sidebarExpanded}
         />
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 w-full">
+        <main className="flex-1 p-2.5 sm:p-3.5 lg:p-4 w-full">
           <AppRoutes />
         </main>
       </div>
