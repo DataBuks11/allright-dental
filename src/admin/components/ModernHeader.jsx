@@ -6,14 +6,15 @@ import {
   FaBell,
   FaCog,
   FaChevronDown,
-  FaShieldAlt,
   FaClock,
   FaPhoneAlt,
-  FaTooth
+  FaTooth,
+  FaSignOutAlt,
+  FaChevronLeft
 } from "react-icons/fa";
 
-const ModernHeader = ({ toggleSidebar }) => {
-  const { user } = useAuth();
+const ModernHeader = ({ toggleSidebar, isSidebarExpanded }) => {
+  const { user, logout } = useAuth();
   const [currentTime, setCurrentTime] = useState("");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
@@ -34,20 +35,23 @@ const ModernHeader = ({ toggleSidebar }) => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-2xs">
-      {/* Left: Mobile Toggle & Brand Logo */}
-      <div className="flex items-center gap-3 sm:gap-4">
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-6 py-2.5 flex items-center justify-between shadow-2xs w-full">
+      {/* Left: Sidebar Toggle Button (Mobile & Desktop) & Brand Logo */}
+      <div className="flex items-center gap-2.5 sm:gap-4">
+        {/* Toggle Button: Opens/Closes Sidebar on Desktop and Mobile */}
         <button
+          type="button"
           onClick={toggleSidebar}
-          className="md:hidden p-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-          aria-label="Toggle Menu"
+          className="p-2 text-slate-700 hover:text-[#003BC4] hover:bg-slate-100 rounded-xl transition-colors cursor-pointer flex items-center justify-center focus:outline-none"
+          title={isSidebarExpanded ? "Collapse Sidebar" : "Expand Sidebar"}
+          aria-label="Toggle Sidebar"
         >
-          <FaBars className="text-lg" />
+          <FaBars className="text-base sm:text-lg" />
         </button>
 
-        {/* Brand Logo & Name Matching Mockup */}
-        <Link to="/admin/dashboard" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#003BC4] to-[#00B7AA] text-white flex items-center justify-center font-bold text-base shadow-sm group-hover:scale-105 transition-transform">
+        {/* Brand Logo & Name Matching MEDIX Design */}
+        <Link to="/admin/dashboard" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#003BC4] to-[#00B7AA] text-white flex items-center justify-center font-bold text-base shadow-sm group-hover:scale-105 transition-transform">
             <span>✱</span>
           </div>
           <div>
@@ -62,7 +66,7 @@ const ModernHeader = ({ toggleSidebar }) => {
         </Link>
 
         {/* Live Clinic Status Badge */}
-        <div className="hidden xl:flex items-center gap-2 pl-4 border-l border-slate-200">
+        <div className="hidden xl:flex items-center gap-2.5 pl-4 border-l border-slate-200">
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mr-1.5"></span>
             Morrisville Practice Live
@@ -79,7 +83,7 @@ const ModernHeader = ({ toggleSidebar }) => {
         <a
           href="tel:2152951348"
           className="hidden lg:flex items-center gap-1.5 text-xs text-[#003BC4] bg-blue-50/80 hover:bg-blue-100/80 px-3 py-1.5 rounded-full font-semibold border border-blue-200/70 transition-colors"
-          title="Direct Practice Telephony"
+          title="Direct Practice Telephony: (215) 295-1348"
         >
           <FaPhoneAlt className="text-[10px]" /> (215) 295-1348
         </a>
@@ -98,63 +102,84 @@ const ModernHeader = ({ toggleSidebar }) => {
         <Link
           to="/admin/appointments"
           className="w-9 h-9 rounded-full border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center justify-center transition-colors relative cursor-pointer"
-          title="Live Clinical Alerts & Appointments"
+          title="4 Appointments Pending"
           aria-label="Notifications"
         >
           <FaBell className="text-sm" />
-          <span className="w-2.5 h-2.5 rounded-full bg-[#00B7AA] absolute top-1.5 right-1.5 border-2 border-white pointer-events-none"></span>
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#00B7AA] border border-white" />
         </Link>
 
-        {/* Doctor Shalini User Profile Pill */}
+        {/* Doctor Shalini Admin Profile Pill (Pure Square Face Avatar) */}
         <div className="relative">
           <button
+            type="button"
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-2 p-1 sm:pr-2.5 rounded-full border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50 transition-all cursor-pointer bg-white"
+            className="flex items-center gap-2 pl-2 pr-3 py-1 rounded-full border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all cursor-pointer bg-white"
           >
             <img
-              src="/drShaliniPortrait.jpg"
-              alt="Doctor Shalini Mandapatti"
-              className="w-8 h-8 rounded-full object-cover ring-1 ring-[#003BC4]/30"
+              src="/drShaliniAvatar.jpg"
+              alt="Doctor Shalini Mandapatti, DDS"
+              className="w-8 h-8 rounded-full object-cover border border-teal-500/60 shadow-2xs"
               onError={(e) => {
                 e.target.src = "/drShaliniUpdate.jpg";
               }}
             />
-            <div className="hidden sm:block text-left pr-1">
-              <p className="text-xs font-bold text-slate-800 leading-tight">Doctor Shalini</p>
-              <p className="text-[10px] text-slate-500 font-semibold leading-tight">Admin</p>
+            <div className="text-left hidden sm:block">
+              <span className="text-xs font-bold text-slate-800 leading-tight block">
+                Doctor Shalini
+              </span>
+              <span className="text-[10px] text-teal-600 font-medium block">
+                Lead Dentist
+              </span>
             </div>
-            <FaChevronDown className="text-[10px] text-slate-400 hidden sm:block" />
+            <FaChevronDown className="text-[9px] text-slate-400" />
           </button>
 
           {/* Profile Dropdown Menu */}
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in zoom-in-95">
-              <div className="px-4 py-2 border-b border-slate-100">
-                <p className="text-xs font-bold text-slate-900">Doctor Shalini Mandapatti, DDS</p>
-                <p className="text-[11px] text-[#003BC4] font-semibold">Lead Attending Dentist</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">229 Plaza Blvd, Suite 23</p>
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="px-4 py-2 border-b border-slate-100 flex items-center gap-2.5">
+                <img
+                  src="/drShaliniAvatar.jpg"
+                  alt="Doctor Shalini"
+                  className="w-9 h-9 rounded-full object-cover border border-teal-500"
+                />
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-900 truncate">
+                    Doctor Shalini Mandapatti
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-mono">DDS • Morrisville, PA</p>
+                </div>
               </div>
+
               <Link
                 to="/admin/schedule"
                 onClick={() => setShowProfileMenu(false)}
-                className="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 font-medium"
+                className="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50"
               >
-                📅 Doctor Shalini Schedule
+                Doctor Schedule
               </Link>
               <Link
-                to="/admin/security-audit"
+                to="/admin/timing"
                 onClick={() => setShowProfileMenu(false)}
-                className="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 font-medium"
+                className="block px-4 py-2 text-xs text-slate-700 hover:bg-slate-50"
               >
-                🛡️ HIPAA Security Audit
+                Operatory Time Blocks
               </Link>
-              <Link
-                to="/admin/login"
-                onClick={() => setShowProfileMenu(false)}
-                className="block px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 font-semibold border-t border-slate-100 mt-1"
-              >
-                🚪 Sign Out
-              </Link>
+
+              <div className="border-t border-slate-100 mt-1 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    logout();
+                  }}
+                  className="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-semibold"
+                >
+                  <FaSignOutAlt className="text-xs" />
+                  <span>Secure Sign Out</span>
+                </button>
+              </div>
             </div>
           )}
         </div>

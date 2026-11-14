@@ -60,7 +60,7 @@ export const DEMO_USERS = {
     phone: "(215) 295-1348",
     mfaEnabled: true,
     mfaMethod: "TOTP",
-    avatar: "/drShaliniPortrait.jpg"
+    avatar: "/drShaliniAvatar.jpg"
   },
   [ROLES.DOCTOR]: {
     id: "USR-002",
@@ -72,7 +72,7 @@ export const DEMO_USERS = {
     phone: "(215) 295-1349",
     mfaEnabled: true,
     mfaMethod: "TOTP",
-    avatar: "/drShaliniPortrait.jpg"
+    avatar: "/drShaliniAvatar.jpg"
   },
   [ROLES.RECEPTIONIST]: {
     id: "USR-003",
@@ -84,7 +84,7 @@ export const DEMO_USERS = {
     phone: "(215) 295-1348",
     mfaEnabled: true,
     mfaMethod: "SMS",
-    avatar: "/drShaliniPortrait.jpg"
+    avatar: "/drShaliniAvatar.jpg"
   },
   [ROLES.PATIENT]: {
     id: "PAT-004",
@@ -96,7 +96,7 @@ export const DEMO_USERS = {
     phone: "(215) 555-0199",
     mfaEnabled: true,
     mfaMethod: "SMS",
-    avatar: "/drShaliniPortrait.jpg"
+    avatar: "/drShaliniAvatar.jpg"
   }
 };
 
@@ -108,8 +108,8 @@ export const AuthProvider = ({ children }) => {
       const savedUser = localStorage.getItem("allright_auth_user");
       if (savedUser) {
         const u = JSON.parse(savedUser);
-        // Guarantee Doctor Shalini real portrait is used, purge any old cached stock photo
-        u.avatar = "/drShaliniPortrait.jpg";
+        // Guarantee Doctor Shalini real face avatar is used, purge any old cached stock photo
+        u.avatar = "/drShaliniAvatar.jpg";
         return u;
       }
       if (localStorage.getItem("isLoggedIn") === "true") {
