@@ -12,20 +12,20 @@ import {
 
 const INITIAL_SCHEDULE = {
   Wednesday: [
-    { time: "10:00 AM", category: "morning", blocked: false, patient: "Michael Scott" },
+    { time: "10:00 AM", category: "morning", blocked: false, patient: "Scott Talley" },
     { time: "10:45 AM", category: "morning", blocked: false, patient: null },
     { time: "11:30 AM", category: "morning", blocked: false, patient: null },
-    { time: "01:30 PM", category: "afternoon", blocked: false, patient: "Sarah Connor" },
+    { time: "01:30 PM", category: "afternoon", blocked: false, patient: "Brian Reilly" },
     { time: "02:15 PM", category: "afternoon", blocked: false, patient: null },
     { time: "03:00 PM", category: "afternoon", blocked: true, blockReason: "Staff In-Service" },
     { time: "04:00 PM", category: "afternoon", blocked: false, patient: null }
   ],
   Thursday: [
     { time: "10:00 AM", category: "morning", blocked: false, patient: null },
-    { time: "10:45 AM", category: "morning", blocked: false, patient: "David Miller" },
+    { time: "10:45 AM", category: "morning", blocked: false, patient: "Samantha Reilly" },
     { time: "11:30 AM", category: "morning", blocked: false, patient: null },
     { time: "01:30 PM", category: "afternoon", blocked: false, patient: null },
-    { time: "02:15 PM", category: "afternoon", blocked: false, patient: "Emily Watson" },
+    { time: "02:15 PM", category: "afternoon", blocked: false, patient: "Darlayah Mcmillan" },
     { time: "03:00 PM", category: "afternoon", blocked: false, patient: null },
     { time: "04:00 PM", category: "afternoon", blocked: false, patient: null }
   ],
@@ -41,7 +41,7 @@ const INITIAL_SCHEDULE = {
   Saturday: [
     { time: "09:00 AM", category: "morning", blocked: false, patient: null },
     { time: "09:45 AM", category: "morning", blocked: false, patient: null },
-    { time: "10:30 AM", category: "morning", blocked: false, patient: "Robert DeNiro" },
+    { time: "10:30 AM", category: "morning", blocked: false, patient: "Baker Abboud" },
     { time: "11:15 AM", category: "morning", blocked: false, patient: null },
     { time: "12:00 PM", category: "morning", blocked: false, patient: null }
   ]

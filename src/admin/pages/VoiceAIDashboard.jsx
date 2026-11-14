@@ -38,7 +38,7 @@ export default function VoiceAIDashboard() {
       status: "speaking",
       intent: "appointment_booking",
       barge_in_active: false,
-      last_transcript: "Sarah: 'We have an opening this Thursday at 2:00 PM with Dr. Shalini. Would that work for you?'"
+      last_transcript: "Sarah: 'We have an opening this Thursday at 2:00 PM with Doctor Shalini. Would that work for you?'"
     }
   ]);
 
@@ -61,8 +61,8 @@ export default function VoiceAIDashboard() {
     clinic_address: "229 Plaza Blvd. Suite 23, Morrisville, PA 19067",
     transfer_phone: "(215) 295-1348",
     greeting: "Thank you for calling AllRight Dental! My name is Sarah. How can I help you with your dental care today?",
-    llm_provider: "openai",
-    llm_model: "gpt-4o-mini",
+    llm_provider: "Enterprise AI Engine",
+    llm_model: "DeepSeek V4.1 Flash",
     stt_provider: "deepgram",
     tts_provider: "deepgram",
     tts_voice: "aura-asteria-en",
@@ -205,7 +205,7 @@ export default function VoiceAIDashboard() {
 
     // Simulate Sarah's Clinical Response
     setTimeout(() => {
-      let reply = "I would be delighted to assist you with that. Let me check our calendar with Dr. Shalini Mandapatti.";
+      let reply = "I would be delighted to assist you with that. Let me check our calendar with Doctor Shalini Mandapatti.";
       const low = userText.toLowerCase();
 
       if (low.includes('barge') || low.includes('wait') || low.includes('actually')) {
@@ -223,7 +223,7 @@ export default function VoiceAIDashboard() {
       } else if (low.includes('transfer') || low.includes('human') || low.includes('staff') || low.includes('receptionist')) {
         reply = "I am transferring you immediately to our front desk team at AllRight Dental: (215) 295-1348. Please stay on the line for just a moment.";
       } else if (low.includes('emergency') || low.includes('pain') || low.includes('bleeding')) {
-        reply = "Dr. Shalini reserves same-day emergency slots for severe tooth pain and trauma. If you have trouble breathing or swallowing, please dial 911 immediately; otherwise, I am putting you through to our urgent clinical line.";
+        reply = "Doctor Shalini reserves same-day emergency slots for severe tooth pain and trauma. If you have trouble breathing or swallowing, please dial 911 immediately; otherwise, I am putting you through to our urgent clinical line.";
       } else if (low.includes('recall') || low.includes('cleaning') || low.includes('prophy')) {
         reply = "According to our continuing care records, you are due for your preventative dental cleaning! We have openings next Monday morning. Shall I reserve a 10:00 AM slot for you?";
       }
@@ -393,7 +393,7 @@ export default function VoiceAIDashboard() {
                 <div>
                   <h5 className="text-info mb-1"><i className="bi bi-geo-alt-fill me-2"></i>AllRight Dental Practice Info</h5>
                   <p className="mb-0 text-light small">
-                    <b>Address:</b> 229 Plaza Blvd. Suite 23, Morrisville, PA 19067 &bull; <b>Direct Tel:</b> (215) 295-1348 &bull; <b>Attending:</b> Dr. Shalini Mandapatti, DDS
+                    <b>Address:</b> 229 Plaza Blvd. Suite 23, Morrisville, PA 19067 &bull; <b>Direct Tel:</b> (215) 295-1348 &bull; <b>Attending:</b> Doctor Shalini Mandapatti, DDS
                   </p>
                 </div>
                 <div>

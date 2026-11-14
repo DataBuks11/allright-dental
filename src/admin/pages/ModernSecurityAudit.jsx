@@ -17,7 +17,7 @@ const AUDIT_LOGS = [
   { id: "LOG-902", timestamp: "12 mins ago", action: "Patient Phone & Email Record Updated", user: "Sarah (AI Receptionist)", target: "Piyush Junghare (DOB: 2005-05-20)", ip: "10.0.4.11", status: "SUCCESS" },
   { id: "LOG-903", timestamp: "25 mins ago", action: "MFA Authentication TOTP Verified", user: "Doctor Shalini Mandapatti, DDS", target: "Session Token #3910", ip: "73.189.21.90", status: "SUCCESS" },
   { id: "LOG-904", timestamp: "1 hour ago", action: "Schedule Slot Blocked (Wed 3:00 PM)", user: "Doctor Shalini Mandapatti, DDS", target: "Operatory 1", ip: "73.189.21.90", status: "SUCCESS" },
-  { id: "LOG-905", timestamp: "2 hours ago", action: "Patient Recall Dispatched (Dentrix D6)", user: "Automated Outbound Agent", target: "Michael Scott", ip: "10.0.4.12", status: "SUCCESS" }
+  { id: "LOG-905", timestamp: "2 hours ago", action: "Patient Recall Dispatched (Dentrix D6)", user: "Automated Outbound Agent", target: "Brian Reilly", ip: "10.0.4.12", status: "SUCCESS" }
 ];
 
 const ModernSecurityAudit = () => {
