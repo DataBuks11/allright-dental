@@ -60,7 +60,7 @@ export const DEMO_USERS = {
     phone: "(215) 295-1348",
     mfaEnabled: true,
     mfaMethod: "TOTP",
-    avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=256"
+    avatar: "/drShaliniUpdate.jpg"
   },
   [ROLES.DOCTOR]: {
     id: "USR-002",
