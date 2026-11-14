@@ -45,10 +45,7 @@
     to { opacity: 1; transform: translateY(0); }
   }
   
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(to right, #e0f7fa, #f1f8e9);
-  }
+
   
   /* Glassmorphism Panel */
   div.mx-auto.p-6 {

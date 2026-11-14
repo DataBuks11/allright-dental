@@ -112,11 +112,11 @@ const ModernHeader = ({ toggleSidebar }) => {
             className="flex items-center gap-2 p-1 sm:pr-2.5 rounded-full border border-slate-200/80 hover:border-slate-300 hover:bg-slate-50 transition-all cursor-pointer bg-white"
           >
             <img
-              src="/drShaliniUpdate.jpg"
+              src="/drShaliniPortrait.jpg"
               alt="Doctor Shalini Mandapatti"
               className="w-8 h-8 rounded-full object-cover ring-1 ring-[#003BC4]/30"
               onError={(e) => {
-                e.target.src = "/drShalini.jpg";
+                e.target.src = "/drShaliniUpdate.jpg";
               }}
             />
             <div className="hidden sm:block text-left pr-1">

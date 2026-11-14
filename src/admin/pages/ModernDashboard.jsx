@@ -10,14 +10,13 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaExternalLinkAlt,
-  FaClock,
   FaArrowRight
 } from "react-icons/fa";
 
 export default function ModernDashboard() {
   const { user } = useAuth();
   const [greeting, setGreeting] = useState("Good Morning");
-  const [activeTab, setActiveTab] = useState("all"); // 'all' | 'new' | 'insurance'
+  const [activeTab, setActiveTab] = useState("all");
   const [selectedPeriod, setSelectedPeriod] = useState("November 2026");
   
   // Events toggle state matching mockup
@@ -35,14 +34,33 @@ export default function ModernDashboard() {
     recalls: "871"
   });
 
-  // Real Registered Patients Roster
+  const getInitials = (name) => {
+    if (!name) return "PT";
+    const parts = name.trim().split(" ");
+    if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  const getInitialsBadgeStyle = (idx) => {
+    const styles = [
+      "bg-blue-100 text-[#003BC4] border border-blue-200",
+      "bg-purple-100 text-purple-700 border border-purple-200",
+      "bg-teal-100 text-teal-700 border border-teal-200",
+      "bg-amber-100 text-amber-800 border border-amber-200",
+      "bg-rose-100 text-rose-700 border border-rose-200"
+    ];
+    return styles[idx % styles.length];
+  };
+
+  // Real Registered Patients Roster - Professional Clinical EHR Initials (ZERO stock/AI images)
   const [patientsToday, setPatientsToday] = useState([
     {
       id: "APT-3150",
       name: "Brian Reilly",
       diagnosis: "Routine Cleaning & Exam",
       time: "10:00 am",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120",
+      initials: "BR",
+      initialsStyle: "bg-blue-100 text-[#003BC4] border border-blue-200",
       status: "Checked In"
     },
     {
@@ -50,7 +68,8 @@ export default function ModernDashboard() {
       name: "Samantha Reilly",
       diagnosis: "Comprehensive Dental Exam",
       time: "11:00 am",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=120",
+      initials: "SR",
+      initialsStyle: "bg-purple-100 text-purple-700 border border-purple-200",
       status: "In Treatment"
     },
     {
@@ -58,7 +77,8 @@ export default function ModernDashboard() {
       name: "Darlayah Mcmillan",
       diagnosis: "Emergency Toothache Visit",
       time: "01:00 pm",
-      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=120",
+      initials: "DM",
+      initialsStyle: "bg-teal-100 text-teal-700 border border-teal-200",
       status: "Confirmed"
     },
     {
@@ -66,7 +86,8 @@ export default function ModernDashboard() {
       name: "Scott Talley",
       diagnosis: "Porcelain Crown Fit",
       time: "02:30 pm",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120",
+      initials: "ST",
+      initialsStyle: "bg-amber-100 text-amber-800 border border-amber-200",
       status: "Confirmed"
     }
   ]);
@@ -97,20 +118,16 @@ export default function ModernDashboard() {
       .then((r) => r.json())
       .then((res) => {
         if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-          const avatars = [
-            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120",
-            "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=120",
-            "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=120",
-            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120"
-          ];
           const mapped = res.data.slice(0, 4).map((reg, idx) => {
             const timeRaw = reg.time || "10:00 am";
+            const name = `${reg.firstName} ${reg.lastName}`;
             return {
               id: `APT-${reg.id}`,
-              name: `${reg.firstName} ${reg.lastName}`,
+              name: name,
               diagnosis: idx === 0 ? "Routine Cleaning & Exam" : (idx === 1 ? "Comprehensive Dental Exam" : (idx === 2 ? "Emergency Toothache Visit" : "Porcelain Crown Fit")),
               time: timeRaw.toLowerCase().includes("am") || timeRaw.toLowerCase().includes("pm") ? timeRaw : `${timeRaw} am`,
-              avatar: avatars[idx % avatars.length],
+              initials: getInitials(name),
+              initialsStyle: getInitialsBadgeStyle(idx),
               status: idx === 0 ? "Checked In" : (idx === 1 ? "In Treatment" : "Confirmed")
             };
           });
@@ -127,7 +144,7 @@ export default function ModernDashboard() {
   };
 
   return (
-    <div className="space-y-4 max-w-full">
+    <div className="space-y-4 w-full">
       {/* 1. Header Greeting & Filter Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div>
@@ -153,7 +170,7 @@ export default function ModernDashboard() {
       </div>
 
       {/* 2. Top 4 Metric / KPI Cards (Row of 4 Equal Width Cards) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 w-full">
         {/* Card 1: Total Appointment */}
         <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs hover:shadow-md transition-shadow">
           <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#003BC4] flex items-center justify-center text-sm shadow-2xs">
@@ -208,9 +225,9 @@ export default function ModernDashboard() {
       </div>
 
       {/* 3. Main Dashboard Layout (8 Cols Left / 4 Cols Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch w-full">
         {/* ================= LEFT SECTION (8 Cols) ================= */}
-        <div className="lg:col-span-8 space-y-4">
+        <div className="lg:col-span-8 flex flex-col justify-between gap-4">
           {/* A. "Your Patients Today" Analytics & Line Chart Card */}
           <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 border-b border-slate-100">
@@ -362,7 +379,7 @@ export default function ModernDashboard() {
           </div>
 
           {/* B. Bottom Grid (Events Card + Patients Today Roster Card) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
             {/* Card 1: Events */}
             <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex flex-col justify-between">
               <div>
@@ -391,18 +408,18 @@ export default function ModernDashboard() {
                           {evt.time}
                         </p>
 
-                        {/* Stacked Avatars */}
-                        <div className="flex items-center -space-x-1.5 mt-1.5">
+                        {/* Real Staff Badges: Doctor Shalini + RDH + DA */}
+                        <div className="flex items-center -space-x-1 mt-1.5">
                           <img
                             src="/drShaliniPortrait.jpg"
-                            alt="Doctor"
+                            alt="Doctor Shalini"
                             className="w-5 h-5 rounded-full object-cover ring-1 ring-white"
                           />
-                          <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold text-[9px] flex items-center justify-center ring-1 ring-white">
-                            SM
+                          <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold text-[8px] flex items-center justify-center ring-1 ring-white">
+                            RDH
                           </div>
-                          <div className="w-5 h-5 rounded-full bg-teal-100 text-teal-700 font-bold text-[9px] flex items-center justify-center ring-1 ring-white">
-                            +2
+                          <div className="w-5 h-5 rounded-full bg-teal-100 text-teal-700 font-bold text-[8px] flex items-center justify-center ring-1 ring-white">
+                            DA
                           </div>
                         </div>
                       </div>
@@ -428,7 +445,7 @@ export default function ModernDashboard() {
               </div>
             </div>
 
-            {/* Card 2: Your Patients Today (Roster) */}
+            {/* Card 2: Your Patients Today (Roster) - Clinical Initials Badges */}
             <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
@@ -449,11 +466,12 @@ export default function ModernDashboard() {
                       className="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-50 transition-colors"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <img
-                          src={pt.avatar}
-                          alt={pt.name}
-                          className="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200 shrink-0"
-                        />
+                        {/* Clinical EHR Initials Badge */}
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${pt.initialsStyle}`}
+                        >
+                          {pt.initials}
+                        </div>
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-slate-800 truncate leading-tight">
                             {pt.name}
@@ -489,7 +507,7 @@ export default function ModernDashboard() {
         </div>
 
         {/* ================= RIGHT SECTION (4 Cols) ================= */}
-        <div className="lg:col-span-4 space-y-4">
+        <div className="lg:col-span-4 flex flex-col justify-between gap-4">
           {/* Widget 1: Appointment Mini Calendar Widget */}
           <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -551,61 +569,63 @@ export default function ModernDashboard() {
           </div>
 
           {/* Widget 2: Featured Attending Doctor Card (Doctor Shalini Mandapatti, DDS) */}
-          <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Upcoming Doctor
-              </span>
-              <Link
-                to="/admin/schedule"
-                className="text-slate-400 hover:text-[#003BC4] text-xs transition-colors"
-                title="View Doctor Schedule"
-              >
-                <FaExternalLinkAlt />
-              </Link>
-            </div>
-
-            <h3 className="text-base font-extrabold text-slate-900 mt-1 leading-tight">
-              Doctor Shalini Mandapatti
-            </h3>
-            
-            <div className="mt-1">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#003BC4] border border-blue-200/80">
-                <FaTooth className="text-[9px]" /> Lead Cosmetic & Family Dentist
-              </span>
-            </div>
-
-            {/* SOLO Photo of Doctor Shalini (No other doctors!) */}
-            <div className="relative mt-3 rounded-2xl overflow-hidden border border-slate-100 shadow-xs bg-slate-50">
-              <img
-                src="/drShaliniPortrait.jpg"
-                alt="Doctor Shalini Mandapatti, DDS"
-                className="w-full h-44 object-cover object-top"
-                onError={(e) => {
-                  e.target.src = "/drShaliniUpdate.jpg";
-                }}
-              />
-              <div className="absolute bottom-2 right-2 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-800 shadow-2xs border border-white/60">
-                15+ Yrs Exp
+          <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex-1 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Upcoming Doctor
+                </span>
+                <Link
+                  to="/admin/schedule"
+                  className="text-slate-400 hover:text-[#003BC4] text-xs transition-colors"
+                  title="View Doctor Schedule"
+                >
+                  <FaExternalLinkAlt />
+                </Link>
               </div>
-            </div>
 
-            {/* About Doctor Shalini */}
-            <div className="mt-3">
-              <p className="text-xs font-bold text-slate-800">About Doctor Shalini</p>
-              <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
-                Doctor Shalini provides compassionate care expertise ensuring patient health and restorative excellence... <span className="text-[#003BC4] font-semibold cursor-pointer">Read More</span>
-              </p>
-            </div>
+              <h3 className="text-base font-extrabold text-slate-900 mt-1 leading-tight">
+                Doctor Shalini Mandapatti
+              </h3>
+              
+              <div className="mt-1">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#003BC4] border border-blue-200/80">
+                  <FaTooth className="text-[9px]" /> Lead Cosmetic & Family Dentist
+                </span>
+              </div>
 
-            {/* Info Row: Timing & Consultation Duration */}
-            <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-600">
-              <span className="flex items-center gap-1 font-semibold text-slate-700">
-                📅 Wed - Sat Open
-              </span>
-              <span className="flex items-center gap-1 font-medium text-slate-500">
-                ⏱️ 30 - 45 min
-              </span>
+              {/* SOLO Centered Portrait of Doctor Shalini (No other doctors!) */}
+              <div className="relative mt-3 rounded-2xl overflow-hidden border border-slate-100 shadow-xs bg-slate-50">
+                <img
+                  src="/drShaliniPortrait.jpg"
+                  alt="Doctor Shalini Mandapatti, DDS"
+                  className="w-full h-44 object-cover object-center"
+                  onError={(e) => {
+                    e.target.src = "/drShaliniUpdate.jpg";
+                  }}
+                />
+                <div className="absolute bottom-2 right-2 bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded-md text-[10px] font-bold text-slate-800 shadow-2xs border border-white/60">
+                  15+ Yrs Exp
+                </div>
+              </div>
+
+              {/* About Doctor Shalini */}
+              <div className="mt-2.5">
+                <p className="text-xs font-bold text-slate-800">About Doctor Shalini</p>
+                <p className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
+                  Doctor Shalini provides compassionate care expertise ensuring patient health and restorative excellence... <span className="text-[#003BC4] font-semibold cursor-pointer">Read More</span>
+                </p>
+              </div>
+
+              {/* Info Row: Timing & Consultation Duration */}
+              <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-100 text-[11px] text-slate-600">
+                <span className="flex items-center gap-1 font-semibold text-slate-700">
+                  📅 Wed - Sat Open
+                </span>
+                <span className="flex items-center gap-1 font-medium text-slate-500">
+                  ⏱️ 30 - 45 min
+                </span>
+              </div>
             </div>
 
             {/* Mockup Pill Action Button */}

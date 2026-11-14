@@ -147,9 +147,12 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
           {user && (
             <div className="relative group cursor-pointer" title={user.name}>
               <img
-                src={user.avatar || "/drShaliniUpdate.jpg"}
-                alt={user.name}
+                src="/drShaliniPortrait.jpg"
+                alt="Doctor Shalini Mandapatti, DDS"
                 className="w-9 h-9 rounded-full object-cover border-2 border-teal-500/50 hover:scale-105 transition-transform"
+                onError={(e) => {
+                  e.target.src = "/drShaliniUpdate.jpg";
+                }}
               />
               <span className="opacity-0 group-hover:opacity-100 pointer-events-none absolute left-full ml-3 px-2.5 py-1 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap z-50 transition-opacity border border-slate-800">
                 {user.name} ({user.role})
@@ -200,9 +203,12 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
         {user && (
           <div className="p-3 mx-3 my-2.5 rounded-xl bg-slate-800/70 border border-slate-700/60 flex items-center gap-3">
             <img
-              src={user.avatar || "/drShaliniUpdate.jpg"}
-              alt={user.name}
+              src="/drShaliniPortrait.jpg"
+              alt="Doctor Shalini Mandapatti"
               className="w-10 h-10 rounded-full object-cover border-2 border-teal-500/50"
+              onError={(e) => {
+                e.target.src = "/drShaliniUpdate.jpg";
+              }}
             />
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-white truncate">{user.name}</p>

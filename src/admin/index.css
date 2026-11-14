@@ -1,10 +1,4 @@
-/* General Reset & Typography */
-body {
-  margin: -39px;
-  font-family: 'Segoe UI', Roboto, sans-serif;
-  background-color: #f8f9fa;
-  color: #212529;
-}
+/* General Typography */
 
 h1, h2, h3, h4 {
   font-weight: 600;

@@ -60,7 +60,7 @@ export const DEMO_USERS = {
     phone: "(215) 295-1348",
     mfaEnabled: true,
     mfaMethod: "TOTP",
-    avatar: "/drShaliniUpdate.jpg"
+    avatar: "/drShaliniPortrait.jpg"
   },
   [ROLES.DOCTOR]: {
     id: "USR-002",
@@ -72,7 +72,7 @@ export const DEMO_USERS = {
     phone: "(215) 295-1349",
     mfaEnabled: true,
     mfaMethod: "TOTP",
-    avatar: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=256"
+    avatar: "/drShaliniPortrait.jpg"
   },
   [ROLES.RECEPTIONIST]: {
     id: "USR-003",
@@ -84,7 +84,7 @@ export const DEMO_USERS = {
     phone: "(215) 295-1348",
     mfaEnabled: true,
     mfaMethod: "SMS",
-    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=256"
+    avatar: "/drShaliniPortrait.jpg"
   },
   [ROLES.PATIENT]: {
     id: "PAT-004",
@@ -96,7 +96,7 @@ export const DEMO_USERS = {
     phone: "(215) 555-0199",
     mfaEnabled: true,
     mfaMethod: "SMS",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256"
+    avatar: "/drShaliniPortrait.jpg"
   }
 };
 
@@ -106,8 +106,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem("allright_auth_user");
-      if (savedUser) return JSON.parse(savedUser);
-      // Default to SuperAdmin if legacy isLoggedIn was true
+      if (savedUser) {
+        const u = JSON.parse(savedUser);
+        // Guarantee Doctor Shalini real portrait is used, purge any old cached stock photo
+        u.avatar = "/drShaliniPortrait.jpg";
+        return u;
+      }
       if (localStorage.getItem("isLoggedIn") === "true") {
         return DEMO_USERS[ROLES.SUPER_ADMIN];
       }
