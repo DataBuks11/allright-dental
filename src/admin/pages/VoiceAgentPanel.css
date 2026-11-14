@@ -250,7 +250,7 @@
   z-index: 1;
 }
 
-.ring-2 {
+.pulse-ring.ring-2 {
   width: 190px;
   height: 190px;
   border-color: rgba(0, 59, 196, 0.2);

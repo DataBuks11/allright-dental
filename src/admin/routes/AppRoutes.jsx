@@ -70,6 +70,22 @@ const AppRoutes = () => {
         }
       />
       <Route
+        path="/patients_directory"
+        element={
+          <ProtectedRoute requiredPermission="patients:read">
+            <ModernPatientsDirectory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/patients"
+        element={
+          <ProtectedRoute requiredPermission="patients:read">
+            <ModernPatientsDirectory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/registeredpatients"
         element={
           <ProtectedRoute requiredPermission="patients:read">

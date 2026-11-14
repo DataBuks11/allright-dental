@@ -102,7 +102,7 @@ const ModernHeader = ({ toggleSidebar }) => {
           aria-label="Notifications"
         >
           <FaBell className="text-sm" />
-          <span className="w-2 h-2 rounded-full bg-[#00B7AA] absolute top-2 right-2 ring-2 ring-white"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-[#00B7AA] absolute top-1.5 right-1.5 border-2 border-white pointer-events-none"></span>
         </Link>
 
         {/* Doctor Shalini User Profile Pill */}

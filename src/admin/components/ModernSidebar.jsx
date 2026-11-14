@@ -149,7 +149,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
               <img
                 src={user.avatar || "/drShaliniUpdate.jpg"}
                 alt={user.name}
-                className="w-9 h-9 rounded-full object-cover ring-2 ring-teal-500/40 hover:scale-105 transition-transform"
+                className="w-9 h-9 rounded-full object-cover border-2 border-teal-500/50 hover:scale-105 transition-transform"
               />
               <span className="opacity-0 group-hover:opacity-100 pointer-events-none absolute left-full ml-3 px-2.5 py-1 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap z-50 transition-opacity border border-slate-800">
                 {user.name} ({user.role})
@@ -202,7 +202,7 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
             <img
               src={user.avatar || "/drShaliniUpdate.jpg"}
               alt={user.name}
-              className="w-10 h-10 rounded-full object-cover ring-2 ring-teal-500/50"
+              className="w-10 h-10 rounded-full object-cover border-2 border-teal-500/50"
             />
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-white truncate">{user.name}</p>
