@@ -92,8 +92,8 @@ const ModernSidebar = ({ isOpen, setIsOpen }) => {
         />
       )}
 
-      {/* Desktop Sleek Vertical Pill Sidebar */}
-      <aside className="hidden md:flex flex-col items-center justify-between py-5 px-2.5 my-3 ml-3 bg-[#0B132B] text-slate-300 w-16 lg:w-18 rounded-3xl shadow-xl border border-slate-800/80 sticky top-3 h-[calc(100vh-1.5rem)] z-40 shrink-0">
+      {/* Desktop Sleek Vertical Pill Sidebar - Fixed Viewport Height */}
+      <aside className="hidden md:flex flex-col items-center justify-between py-4 px-2 bg-[#0B132B] text-slate-300 w-16 lg:w-18 shadow-xl border-r border-slate-800/80 sticky top-0 h-screen z-40 shrink-0">
         {/* Top App Icon Badge */}
         <div className="flex flex-col items-center gap-2">
           <NavLink

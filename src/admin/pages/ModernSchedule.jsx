@@ -74,7 +74,7 @@ const ModernSchedule = () => {
   const days = ["Wednesday", "Thursday", "Friday", "Saturday"];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 w-full">
       {/* Top Banner */}
       <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

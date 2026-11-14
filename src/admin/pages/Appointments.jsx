@@ -147,9 +147,9 @@ const Appointments = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 w-full">
       {/* Top Banner Card */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 mb-2">
             <FaCalendarCheck className="text-[#003BC4]" />
