@@ -70,6 +70,34 @@ const cleanSpokenPhone = (raw) => {
   return raw;
 };
 
+// ✅ Clinic Timezone: Strictly America/New_York (Morrisville, PA - US Eastern Time)
+export const getNYDate = (base = new Date()) => {
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false
+    });
+    const parts = formatter.formatToParts(base);
+    const p = {};
+    for (const part of parts) p[part.type] = part.value;
+    return new Date(
+      parseInt(p.year, 10),
+      parseInt(p.month, 10) - 1,
+      parseInt(p.day, 10),
+      parseInt(p.hour, 10) || 0,
+      parseInt(p.minute, 10) || 0
+    );
+  } catch (err) {
+    return new Date(base);
+  }
+};
+
 // Universal friendly human-readable appointment date formatter
 const formatFriendlyDate = (raw) => {
   if (!raw) return "Upcoming Open Slot";
@@ -84,12 +112,102 @@ const formatFriendlyDate = (raw) => {
           day: 'numeric',
           hour: 'numeric',
           minute: '2-digit',
-          hour12: true
+          hour12: true,
+          timeZone: 'America/New_York'
         });
       }
     } catch (e) {}
   }
   return str;
+};
+
+// Compute Dynamic Available Slots Strictly in US Eastern (Morrisville, PA)
+export const getClinicAvailableSlots = () => {
+  const nyNow = getNYDate();
+  const currentNYHour = nyNow.getHours();
+  
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const fullMonthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const clinicDays = {};
+  for (let i = 0; i <= 14; i++) {
+    const d = new Date(nyNow.getFullYear(), nyNow.getMonth(), nyNow.getDate() + i);
+    const dow = d.getDay(); // 0: Sun, 1: Mon, 2: Tue, 3: Wed, 4: Thu, 5: Fri, 6: Sat
+    
+    // Open days: Wednesday (3), Thursday (4), Friday (5), Saturday (6)
+    if (dow >= 3 && dow <= 6) {
+      if (i === 0) {
+        if (dow === 6 && currentNYHour >= 12) continue; // Saturday closes 1:00 PM
+        if (dow >= 3 && dow <= 5 && currentNYHour >= 16) continue; // Wed-Fri closes 5:00 PM
+      }
+      
+      const dName = dayNames[dow];
+      if (!clinicDays[dName]) {
+        clinicDays[dName] = {
+          dayName: dName,
+          monthShort: monthNames[d.getMonth()],
+          monthLong: fullMonthNames[d.getMonth()],
+          dayNum: d.getDate(),
+          yearNum: d.getFullYear(),
+          formattedShort: `${dName}, ${monthNames[d.getMonth()]} ${d.getDate()}`,
+          formattedFull: `${dName}, ${fullMonthNames[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
+        };
+      }
+    }
+  }
+
+  const defaultMonth = fullMonthNames[nyNow.getMonth()];
+  const defaultYear = nyNow.getFullYear();
+
+  const wed = clinicDays["Wednesday"] || { formattedShort: "Wednesday", dayNum: "", monthLong: defaultMonth, yearNum: defaultYear };
+  const thu = clinicDays["Thursday"] || { formattedShort: "Thursday", dayNum: "", monthLong: defaultMonth, yearNum: defaultYear };
+  const fri = clinicDays["Friday"] || { formattedShort: "Friday", dayNum: "", monthLong: defaultMonth, yearNum: defaultYear };
+  const sat = clinicDays["Saturday"] || { formattedShort: "Saturday", dayNum: "", monthLong: defaultMonth, yearNum: defaultYear };
+
+  const wedThuMorning = [
+    `${wed.formattedShort} at 10:30 AM`,
+    `${thu.formattedShort} at 11:00 AM`
+  ];
+  const wedThuAfternoon = [
+    `${wed.formattedShort} at 2:30 PM`,
+    `${thu.formattedShort} at 3:30 PM`
+  ];
+  const friMorning = [
+    `${fri.formattedShort} at 10:30 AM`
+  ];
+  const friEveningLast = [
+    `${fri.formattedShort} at 3:30 PM (Friday late afternoon)`
+  ];
+  const satMorningHalfDay = [
+    `${sat.formattedShort} at 10:00 AM (Saturday morning half-day)`
+  ];
+
+  const allAvailableList = [
+    ...wedThuMorning,
+    ...wedThuAfternoon,
+    ...friMorning,
+    ...friEveningLast,
+    ...satMorningHalfDay
+  ];
+
+  return {
+    nyNow,
+    wed,
+    thu,
+    fri,
+    sat,
+    recommended: wedThuMorning,
+    wedThuMorning,
+    wedThuAfternoon,
+    friMorning,
+    friEveningLast,
+    satMorningHalfDay,
+    allAvailableList
+  };
 };
 
 // 8 Practice Dental Services - 1-Tap Booking (Minimizes procedures)
@@ -106,18 +224,26 @@ export const DENTAL_SERVICES = [
 
 // Dynamic Date, Calendar & Guardrails System Prompt Generator for Allright Dental
 const getDynamicSystemPromptEn = () => {
-  const now = new Date();
+  const slots = getClinicAvailableSlots();
+  const nyNow = slots.nyNow;
   const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/New_York' };
   const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'America/New_York' };
   
-  const todayStr = now.toLocaleDateString('en-US', dateOptions);
-  const currentTimeStr = now.toLocaleTimeString('en-US', timeOptions);
+  const rawNow = new Date();
+  const todayStr = rawNow.toLocaleDateString('en-US', dateOptions);
+  const currentTimeStr = rawNow.toLocaleTimeString('en-US', timeOptions);
+
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const fullMonthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
 
   const upcomingDays = [];
   for (let i = 0; i < 10; i++) {
-    const target = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
-    const dayName = target.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'America/New_York' });
-    const dateFormatted = target.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' });
+    const d = new Date(nyNow.getFullYear(), nyNow.getMonth(), nyNow.getDate() + i);
+    const dayName = dayNames[d.getDay()];
+    const dateFormatted = `${fullMonthNames[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
     
     let statusText = "CLOSED";
     if (dayName === "Wednesday" || dayName === "Thursday" || dayName === "Friday") {
@@ -167,11 +293,12 @@ Gentle cleanings, comprehensive exams, digital low-dose X-rays, tooth-colored co
 *** SPOKEN VOICE CONVERSATION FORMATTING (STRICT) ***:
 - Speak in warm, natural, human conversational sentences (1-2 sentences at a time).
 - NEVER output markdown formatting, asterisks (**bold**), bullet points, or numbered lists (e.g. 1. 2.) in your spoken dialogue!
-- Propose options naturally: "Doctor Shalini has Wednesday at 10:30 AM or Thursday at 11:00 AM. Which of those times works best for you?"
+- Propose options naturally: "Doctor Shalini has ${slots.wedThuMorning[0]} or ${slots.wedThuMorning[1]}. Which of those times works best for you?"
 
 *** LIVE CALENDAR & SCHEDULING ACCESS (ACCURATE REAL-TIME DATES) ***:
 CURRENT DATE & TIME (Morrisville, PA - Eastern Time): ${todayStr}, ${currentTimeStr}.
-CURRENT YEAR: ${now.getFullYear()}. CURRENT MONTH: ${now.toLocaleDateString('en-US', { month: 'long' })}.
+CURRENT YEAR: ${nyNow.getFullYear()}. CURRENT MONTH: ${slots.wed.monthLong}.
+CRITICAL CALENDAR RULE: You are strictly operating in ${slots.wed.monthLong} ${slots.wed.yearNum}. NEVER mention October or past months! Only offer open slots from the OFFICIAL PRACTICE CALENDAR SCHEDULE below.
 
 OFFICIAL PRACTICE CALENDAR SCHEDULE:
 ${upcomingDays.join('\n')}
@@ -228,22 +355,23 @@ Follow this natural, responsive receptionist flow for every call and chat:
 
 4. STRATEGIC SLOT OFFERING (MUST ALWAYS PRESENT SPECIFIC DATES & TIMES):
    Clinic Open Days: Wednesday, Thursday, Friday (10:00 AM - 5:00 PM), and Saturday morning (9:00 AM - 1:00 PM half-day).
-   - When offering slots, YOU MUST ALWAYS STATE AT LEAST 2 SPECIFIC OPEN TIMES:
-     * Morning: "Doctor Shalini has Wednesday at 10:30 AM or Thursday at 11:00 AM."
-     * Afternoon: "Doctor Shalini has Wednesday at 2:30 PM or Thursday at 3:30 PM."
-     * Friday: "On Friday, we have 10:30 AM morning or 3:30 PM afternoon."
-     * Saturday: "Doctor Shalini has Saturday morning at 10:00 AM or 11:30 AM."
+   - When offering slots, YOU MUST ALWAYS STATE AT LEAST 2 SPECIFIC OPEN TIMES WITH EXACT DATES:
+     * Morning: "Doctor Shalini has ${slots.wedThuMorning[0]} or ${slots.wedThuMorning[1]}."
+     * Afternoon: "Doctor Shalini has ${slots.wedThuAfternoon[0]} or ${slots.wedThuAfternoon[1]}."
+     * Friday: "On Friday, we have ${slots.friMorning[0]} or ${slots.friEveningLast[0]}."
+     * Saturday: "Doctor Shalini has ${slots.satMorningHalfDay[0]}."
    - ALWAYS ASK: "Which of those days and times works best for you?"
-   - NEVER make a vague statement like "I was able to find afternoon slots" without listing the actual times! Always state the exact times!
+   - NEVER make a vague statement like "I was able to find afternoon slots" without listing the actual dates and times! Always state the exact dates and times!
+   - ABSOLUTE PROHIBITION ON PAST MONTHS OR OLD DATES: You are strictly operating in ${slots.wed.monthLong} ${slots.wed.yearNum}. NEVER mention October or any past month under any circumstance! All appointments are strictly in ${slots.wed.monthLong} ${slots.wed.yearNum} or upcoming months!
 
 5. STRICT NO-AUTO-BOOK GUARDRAIL (NEVER BOOK ON A GENERAL "YES" WITHOUT DATE SELECTION):
    - CRITICAL: A simple "Yes", "Sure", "Okay", or "I want an appointment" IS NOT A SLOT SELECTION!
    - If the patient has NOT yet selected a specific day and time (e.g. they only said "Yes" to scheduling), YOU MUST NOT CALL 'book_appointment'!
-   - Instead, ask: "Which day and time would you prefer? Doctor Shalini has Wednesday at 10:30 AM or Thursday at 2:30 PM."
+   - Instead, ask: "Which day and time would you prefer? Doctor Shalini has ${slots.wedThuMorning[0]} or ${slots.wedThuAfternoon[0]}."
    - YOU MAY ONLY CALL 'book_appointment' WHEN:
-     1. The patient has explicitly stated or agreed to a specific day & time (e.g. "Wednesday at 10:30 AM", "Thursday at 2:30 PM", or a specific date requested by the patient).
-     2. AND you confirm: "So that is [Day] at [Time]. Shall I lock that in for you?" and they say "Yes" (or when they directly tell you to book that specific time).
-   - STRICT FORMAT FOR 'datetime': Pass a clear human-readable string like "Wednesday, Nov 18 at 10:30 AM" or "Thursday at 2:30 PM". NEVER pass an ISO timestamp like "2026-11-19T15:30:00".
+     1. The patient has explicitly stated or agreed to a specific day & time (e.g. "${slots.wedThuMorning[0]}", "${slots.wedThuAfternoon[0]}", or a specific date requested by the patient).
+     2. AND you confirm: "So that is [Day, Date] at [Time]. Shall I lock that in for you?" and they say "Yes" (or when they directly tell you to book that specific time).
+   - STRICT FORMAT FOR 'datetime': Pass a clear human-readable string like "${slots.wedThuMorning[0]}" or "${slots.wedThuAfternoon[0]}". NEVER pass an ISO timestamp like "2026-11-19T15:30:00".
    - When caller agrees to a specific day and time, confirm warmly: "You are all confirmed for [Day, Date] at [Time] with Doctor Shalini Mandapatti at Allright Dental, 229 Plaza Boulevard, Suite 23, Morrisville, PA! We have noted your contact details and look forward to seeing you."
    - STRICT NO CODES: NEVER recite or give check-in codes, chart IDs, or meeting codes to the patient!
 
@@ -288,6 +416,8 @@ When the conversation reaches its conclusion:
 };
 
 const getDynamicSystemPromptEs = () => {
+  const slots = getClinicAvailableSlots();
+  const nyNow = slots.nyNow;
   return `Eres Sarah, la recepcionista dental bilingüe 24/7 de Allright Dental en Morrisville, PA.
 Dentista Principal: Doctora Shalini Mandapatti, DDS (más de 15 años de experiencia clínica).
 Teléfono: (215) 295-1348.
@@ -296,6 +426,9 @@ Dirección: 229 Plaza Boulevard, Suite 23, Morrisville, PA 19067. Estacionamient
 *** GUÍA DE PRONUNCIACIÓN (ESTRICTA) ***:
 - NUNCA escribas la abreviatura "Dra." o "Dr.".
 - Escribe SIEMPRE la palabra completa: "Doctora Shalini Mandapatti" o "Doctora Shalini".
+
+FECHA ACTUAL Y ZONA HORARIA (Morrisville, PA - Hora del Este): Noviembre ${nyNow.getFullYear()}.
+REGLA CRÍTICA DE CALENDARIO: Estamos estrictamente en noviembre de ${nyNow.getFullYear()}. NUNCA menciones octubre ni fechas del pasado.
 
 DÍAS Y HORARIOS DE ATENCIÓN:
 - Miércoles, Jueves y Viernes: 10:00 AM a 5:00 PM.
@@ -310,8 +443,12 @@ REGLAS DE ATENCIÓN, CALENDARIO Y SEGURIDAD:
 2. TOMA DE DATOS POR SEPARADO:
    - Paso 1: Primer nombre -> Paso 2: Apellido -> Paso 3: Fecha de nacimiento.
    Una vez obtenidos, invoca lookup_patient.
-3. PRIORIDAD DE HORARIOS:
-   Ofrece primero turnos de mañana de Miércoles o Jueves; luego turnos de tarde; luego Viernes mañana; y deja la tarde del Viernes como última opción. Sábados de 9:00 AM a 1:00 PM.
+3. PRIORIDAD Y FECHAS EXACTAS DE HORARIOS:
+   Ofrece turnos con fechas exactas próximas:
+   - Mañana: Miércoles ${slots.wed.dayNum} de Noviembre a las 10:30 AM o Jueves ${slots.thu.dayNum} de Noviembre a las 11:00 AM.
+   - Tarde: Miércoles ${slots.wed.dayNum} de Noviembre a las 2:30 PM o Jueves ${slots.thu.dayNum} de Noviembre a las 3:30 PM.
+   - Viernes: Viernes ${slots.fri.dayNum} de Noviembre a las 10:30 AM o 3:30 PM.
+   - Sábado: Sábado ${slots.sat.dayNum} de Noviembre a las 10:00 AM (medio día de mañana).
 4. REGLA ESTRICTA SIN CÓDIGOS: NUNCA des claves o códigos de cita al paciente.`;
 };
 
@@ -505,54 +642,7 @@ export default function VoiceReceptionist() {
     }
   };
 
-  const getNextAvailableSlots = () => {
-    const now = new Date();
-    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    
-    const clinicDates = {};
-    for (let i = 1; i <= 14; i++) {
-      const target = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
-      const dow = target.getDay();
-      if (dow >= 3 && dow <= 6) {
-        const dName = dayNames[dow];
-        const mName = monthNames[target.getMonth()];
-        const dNum = target.getDate();
-        if (!clinicDates[dName]) {
-          clinicDates[dName] = `${dName}, ${mName} ${dNum}`;
-        }
-      }
-    }
-
-    const wed = clinicDates["Wednesday"] || "Wednesday";
-    const thu = clinicDates["Thursday"] || "Thursday";
-    const fri = clinicDates["Friday"] || "Friday";
-    const sat = clinicDates["Saturday"] || "Saturday";
-
-    const wedThuMorning = [`${wed} at 10:30 AM`, `${thu} at 11:00 AM`];
-    const wedThuAfternoon = [`${wed} at 2:30 PM`, `${thu} at 3:30 PM`];
-    const friMorning = [`${fri} at 10:30 AM`];
-    const friEveningLast = [`${fri} at 3:30 PM (Friday late afternoon)`];
-    const satMorningHalfDay = [`${sat} at 10:00 AM (Saturday half-day morning)`];
-
-    const recommendedList = [
-      ...wedThuMorning,
-      ...wedThuAfternoon,
-      ...friMorning,
-      ...friEveningLast,
-      ...satMorningHalfDay
-    ];
-
-    return {
-      recommended: wedThuMorning,
-      wedThuMorning,
-      wedThuAfternoon,
-      friMorning,
-      friEveningLast,
-      satMorningHalfDay,
-      allAvailableList: recommendedList
-    };
-  };
+  const getNextAvailableSlots = () => getClinicAvailableSlots();
 
   // Pre-load clinic registered patient database in memory
   useEffect(() => {
