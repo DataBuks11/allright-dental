@@ -94,9 +94,9 @@ const ModernSidebar = ({ isExpanded, setIsExpanded, mobileOpen, setMobileOpen })
         />
       )}
 
-      {/* ================= 2. DESKTOP EXPANDABLE / COLLAPSIBLE SIDEBAR ================= */}
+      {/* ================= 2. DESKTOP EXPANDABLE / COLLAPSIBLE SIDEBAR (LIQUID GLASS) ================= */}
       <aside
-        className={`hidden md:flex flex-col justify-between py-4 bg-[#0B132B]/85 backdrop-blur-xl text-slate-300 shadow-2xl border-r border-white/10 sticky top-0 h-screen z-40 shrink-0 transition-all duration-300 ease-in-out ${
+        className={`hidden md:flex flex-col justify-between py-4 bg-[#060D20]/45 backdrop-blur-2xl text-slate-100 shadow-2xl border-r border-white/20 sticky top-0 h-screen z-40 shrink-0 transition-all duration-300 ease-in-out ${
           isExpanded ? "w-64 px-3" : "w-20 px-2"
         }`}
       >
@@ -154,8 +154,8 @@ const ModernSidebar = ({ isExpanded, setIsExpanded, mobileOpen, setMobileOpen })
                       : "w-10 h-10 mx-auto justify-center"
                   } ${
                     isActive
-                      ? "bg-gradient-to-r from-[#003BC4] to-[#0052FF] text-white shadow-md shadow-blue-600/30 font-semibold"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800/70"
+                      ? "bg-gradient-to-r from-[#003BC4]/85 to-[#0052FF]/85 text-white shadow-lg shadow-blue-600/30 font-semibold border border-blue-400/30 backdrop-blur-md"
+                      : "text-slate-300/85 hover:text-white hover:bg-white/10 hover:backdrop-blur-md"
                   }`
                 }
               >
@@ -188,13 +188,13 @@ const ModernSidebar = ({ isExpanded, setIsExpanded, mobileOpen, setMobileOpen })
         </nav>
 
         {/* Bottom: Doctor Profile Pill & Expand/Collapse / Logout */}
-        <div className="flex flex-col gap-2 pt-3 border-t border-slate-800/80 w-full">
+        <div className="flex flex-col gap-2 pt-3 border-t border-white/15 w-full">
           {/* If Collapsed, show Expand Button */}
           {!isExpanded && (
             <button
               type="button"
               onClick={() => setIsExpanded(true)}
-              className="w-10 h-8 mx-auto rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center justify-center transition-colors cursor-pointer mb-1"
+              className="w-10 h-8 mx-auto rounded-lg text-slate-300 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors cursor-pointer mb-1"
               title="Expand Sidebar"
               aria-label="Expand Sidebar"
             >
@@ -207,7 +207,7 @@ const ModernSidebar = ({ isExpanded, setIsExpanded, mobileOpen, setMobileOpen })
             <div
               className={`flex items-center rounded-xl transition-all ${
                 isExpanded
-                  ? "p-2 bg-slate-900/60 border border-slate-800/80 gap-2.5"
+                  ? "p-2 bg-white/10 backdrop-blur-xl border border-white/20 gap-2.5 shadow-sm"
                   : "justify-center relative group cursor-pointer"
               }`}
               title={user.name}
@@ -215,7 +215,7 @@ const ModernSidebar = ({ isExpanded, setIsExpanded, mobileOpen, setMobileOpen })
               <img
                 src="/drShaliniAvatar.jpg"
                 alt="Doctor Shalini Mandapatti, DDS"
-                className="w-9 h-9 rounded-full object-cover border-2 border-teal-500/60 shadow-xs shrink-0"
+                className="w-9 h-9 rounded-full object-cover border-2 border-teal-400/70 shadow-xs shrink-0"
                 onError={(e) => {
                   e.target.src = "/drShaliniUpdate.jpg";
                 }}
@@ -226,12 +226,12 @@ const ModernSidebar = ({ isExpanded, setIsExpanded, mobileOpen, setMobileOpen })
                   <p className="text-xs font-bold text-white truncate">
                     Doctor Shalini
                   </p>
-                  <p className="text-[10px] text-teal-400 font-mono truncate">
+                  <p className="text-[10px] text-teal-300 font-mono truncate">
                     Lead DDS • Admin
                   </p>
                 </div>
               ) : (
-                <span className="opacity-0 group-hover:opacity-100 pointer-events-none absolute left-full ml-3 px-2.5 py-1 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap z-50 transition-opacity border border-slate-800">
+                <span className="opacity-0 group-hover:opacity-100 pointer-events-none absolute left-full ml-3 px-2.5 py-1 bg-slate-900/90 backdrop-blur-md text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap z-50 transition-opacity border border-white/20">
                   {user.name} ({user.role})
                 </span>
               )}
@@ -243,7 +243,7 @@ const ModernSidebar = ({ isExpanded, setIsExpanded, mobileOpen, setMobileOpen })
             <button
               type="button"
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold text-rose-400 hover:text-white hover:bg-rose-600/20 border border-rose-500/20 transition-all cursor-pointer mt-1"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-semibold text-rose-300 hover:text-white hover:bg-rose-500/25 border border-rose-400/30 backdrop-blur-md transition-all cursor-pointer mt-1"
             >
               <FaSignOutAlt className="text-xs" />
               <span>Sign Out</span>
@@ -252,12 +252,12 @@ const ModernSidebar = ({ isExpanded, setIsExpanded, mobileOpen, setMobileOpen })
             <button
               type="button"
               onClick={handleLogout}
-              className="w-10 h-10 mx-auto rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors relative group cursor-pointer"
+              className="w-10 h-10 mx-auto rounded-xl flex items-center justify-center text-slate-300 hover:text-rose-300 hover:bg-rose-500/20 transition-colors relative group cursor-pointer"
               title="Secure Sign Out"
               aria-label="Secure Sign Out"
             >
               <FaSignOutAlt className="text-base" />
-              <span className="opacity-0 group-hover:opacity-100 pointer-events-none absolute left-full ml-3 px-2.5 py-1 bg-rose-950 text-rose-200 text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap z-50 transition-opacity border border-rose-900">
+              <span className="opacity-0 group-hover:opacity-100 pointer-events-none absolute left-full ml-3 px-2.5 py-1 bg-rose-950/90 backdrop-blur-md text-rose-200 text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap z-50 transition-opacity border border-rose-900">
                 Sign Out
               </span>
             </button>
@@ -267,7 +267,7 @@ const ModernSidebar = ({ isExpanded, setIsExpanded, mobileOpen, setMobileOpen })
 
       {/* ================= 3. MOBILE SLIDE-OUT DRAWER ================= */}
       <aside
-        className={`fixed inset-y-0 left-0 w-72 bg-[#0B132B] text-slate-100 flex flex-col z-50 md:hidden transition-transform duration-300 ease-in-out shadow-2xl ${
+        className={`fixed inset-y-0 left-0 w-72 bg-[#060D20]/85 backdrop-blur-2xl text-slate-100 flex flex-col z-50 md:hidden transition-transform duration-300 ease-in-out shadow-2xl border-r border-white/20 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

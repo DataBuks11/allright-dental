@@ -40,8 +40,8 @@ function AdminAppContent() {
   }
 
   return (
-    <div className="relative h-screen bg-[#F4F7FC]/70 flex font-poppins text-slate-800 antialiased selection:bg-[#003BC4] selection:text-white w-full overflow-hidden admin-liquid-shell">
-      {/* Background Video: Ambient Scenic Nature with Lakes & Cherry Blossoms */}
+    <div className="relative h-screen bg-transparent flex font-poppins text-slate-800 antialiased selection:bg-[#003BC4] selection:text-white w-full overflow-hidden admin-liquid-shell">
+      {/* Background Video: 3D Iridescent Liquid Silk Flowing Waves */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none">
         <video
           autoPlay
@@ -51,10 +51,10 @@ function AdminAppContent() {
           className="w-full h-full object-cover object-center scale-[1.02]"
         >
           <source src="/admin_bg.mp4" type="video/mp4" />
-          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260306_115329_5e00c9c5-4d69-49b7-94c3-9c31c60bb644.mp4" type="video/mp4" />
+          <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260815_034306_165449ef-7d2e-4e81-850f-1939c5cb442d.mp4" type="video/mp4" />
         </video>
-        {/* Translucent glass tint overlay: ensures video movement is clearly visible while text contrast & clarity is 100% sharp */}
-        <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-[0.5px]" />
+        {/* Subtle translucent glass tint overlay: ensures video movement is clearly visible while text contrast & clarity is 100% sharp */}
+        <div className="absolute inset-0 bg-slate-950/15" />
       </div>
 
       {/* Modern Sidebar: Always 100% full height of viewport on desktop, never scrolls away or cuts off */}
@@ -77,7 +77,7 @@ function AdminAppContent() {
         </main>
 
         {/* Global Admin Footer: Liquid Frosted Glass finish on Laptop & Desktop */}
-        <footer className="mt-auto py-2.5 px-4 sm:px-6 bg-white/80 backdrop-blur-md border-t border-white/60 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-600 gap-2 shrink-0 shadow-2xs">
+        <footer className="mt-auto py-2.5 px-4 sm:px-6 bg-white/45 backdrop-blur-2xl border-t border-white/60 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-700 gap-2 shrink-0 shadow-xs">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-slate-800">AllRight Dental PC</span>
             <span className="text-slate-400">•</span>
