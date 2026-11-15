@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Sidebar from '../components/Navbar';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './VoiceAgentPanel.css';
 
@@ -456,8 +455,7 @@ export default function VoiceAgentPanel() {
   );
 
   return (
-    <div className="admin-container">
-      <Sidebar />
+    <div className="w-full">
       <div className="voice-panel-content">
         {/* Top Header */}
         <div className="panel-header-card">
