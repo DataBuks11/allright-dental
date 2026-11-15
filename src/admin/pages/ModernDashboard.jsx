@@ -21,11 +21,12 @@ export default function ModernDashboard() {
   const [activeTab, setActiveTab] = useState("all");
   const [selectedPeriod, setSelectedPeriod] = useState("November 2026");
 
-  // Events toggle state matching MEDIX mockup
+  // Events toggle state matching MEDIX mockup (4 items to balance Row 2 height)
   const [events, setEvents] = useState([
     { id: 1, title: "Doctor Team Meeting", time: "10:00 - 12:00", active: true },
     { id: 2, title: "Surgical Operatory Block", time: "12:00 - 02:00", active: true },
-    { id: 3, title: "Continuing Care & Recalls", time: "03:00 - 04:00", active: false }
+    { id: 3, title: "Continuing Care & Recalls", time: "03:00 - 04:00", active: false },
+    { id: 4, title: "New Patient Consultations", time: "04:00 - 05:00", active: true }
   ]);
 
   // System Counts from live backend
@@ -40,12 +41,13 @@ export default function ModernDashboard() {
     const styles = [
       "bg-blue-100 text-[#003BC4] border border-blue-200",
       "bg-purple-100 text-purple-700 border border-purple-200",
-      "bg-teal-100 text-teal-700 border border-teal-200"
+      "bg-teal-100 text-teal-700 border border-teal-200",
+      "bg-amber-100 text-amber-800 border border-amber-200"
     ];
     return styles[idx % styles.length];
   };
 
-  // Real Registered Patients Roster - Professional Clinical EHR Initials (3 items to match Events card height 1:1)
+  // Real Registered Patients Roster - Professional Clinical EHR Initials (4 items to match Events & Upcoming Doctor height 1:1)
   const [patientsToday, setPatientsToday] = useState([
     {
       id: "APT-3150",
@@ -73,6 +75,15 @@ export default function ModernDashboard() {
       status: "Confirmed",
       initials: "DM",
       initialsStyle: "bg-teal-100 text-teal-700 border border-teal-200"
+    },
+    {
+      id: "APT-3153",
+      name: "Scott Talley",
+      diagnosis: "Porcelain Crown Fit",
+      time: "01:00 PM",
+      status: "Confirmed",
+      initials: "ST",
+      initialsStyle: "bg-amber-100 text-amber-800 border border-amber-200"
     }
   ]);
 
@@ -92,7 +103,7 @@ export default function ModernDashboard() {
             patients: data.length.toString()
           }));
 
-          const mapped = data.slice(0, 3).map((item, idx) => {
+          const mapped = data.slice(0, 4).map((item, idx) => {
             const firstName = item.first_name || item.firstname || "Patient";
             const lastName = item.last_name || item.lastname || "";
             const fullName = `${firstName} ${lastName}`.trim();
@@ -115,8 +126,10 @@ export default function ModernDashboard() {
                   ? "Routine Cleaning & Exam"
                   : idx === 1
                   ? "Comprehensive Dental Exam"
-                  : "Emergency Toothache Visit"),
-              time: item.appointment_time || (idx === 0 ? "05:00 AM" : idx === 1 ? "05:00 AM" : "11:00 AM"),
+                  : idx === 2
+                  ? "Emergency Toothache Visit"
+                  : "Porcelain Crown Fit"),
+              time: item.appointment_time || (idx === 0 ? "05:00 AM" : idx === 1 ? "05:00 AM" : idx === 2 ? "11:00 AM" : "01:00 PM"),
               status: st,
               initials: init,
               initialsStyle: getInitialsBadgeStyle(idx)
@@ -505,6 +518,15 @@ export default function ModernDashboard() {
                 ))}
               </div>
             </div>
+
+            {/* Bottom Practice Calendar Link */}
+            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-[#003BC4]">
+              <Link to="/admin/schedule" className="hover:underline flex items-center gap-1.5">
+                <span>Full Practice Schedule</span>
+                <FaArrowRight className="text-[9px]" />
+              </Link>
+              <span className="text-[10px] text-slate-400 font-normal">4 events planned</span>
+            </div>
           </div>
 
           {/* Card 2: Your Patients Today (Roster) - Clinical Initials Badges */}
@@ -563,6 +585,15 @@ export default function ModernDashboard() {
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Bottom Records Link */}
+            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-[#003BC4]">
+              <Link to="/admin/appointments" className="hover:underline flex items-center gap-1.5">
+                <span>View All Records (3,067)</span>
+                <FaArrowRight className="text-[9px]" />
+              </Link>
+              <span className="text-[10px] text-slate-400 font-normal">Next: 01:00 PM</span>
             </div>
           </div>
         </div>
