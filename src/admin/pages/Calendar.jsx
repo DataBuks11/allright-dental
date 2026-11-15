@@ -105,12 +105,26 @@ export default function Calendar() {
   }, [selectedDate]);
 
   return (
-    <div className="calendar-page-container">
-      <div className="heading-container mb-8">
-        <h1>
-          <FaRegCalendarAlt className="text-white text-3xl" />
-          Available Slots
-        </h1>
+    <div className="space-y-4 w-full max-w-full font-poppins text-slate-800">
+      {/* Modern Header Card */}
+      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-100 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#003BC4] to-[#00B7AA] text-white flex items-center justify-center text-xl shadow-md shadow-blue-500/20 shrink-0">
+            <FaRegCalendarAlt />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
+              Doctor Shalini Mandapatti &bull; Practice Operatory Calendar
+            </h1>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Real-time operatory slot availability across Room 1, Room 2, and Emergency Triage.
+            </p>
+          </div>
+        </div>
+
+        <div className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full self-start sm:self-auto">
+          ● Live Calendar Sync
+        </div>
       </div>
 
       {/* Date Tabs */}
