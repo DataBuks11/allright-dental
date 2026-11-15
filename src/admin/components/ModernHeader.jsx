@@ -35,7 +35,7 @@ const ModernHeader = ({ toggleSidebar, isSidebarExpanded }) => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-6 py-2.5 flex items-center justify-between shadow-2xs w-full">
+    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-white/60 px-3 sm:px-6 py-2.5 flex items-center justify-between shadow-2xs w-full">
       {/* Left: Sidebar Toggle Button (Mobile & Desktop) & Brand Logo */}
       <div className="flex items-center gap-2.5 sm:gap-4">
         {/* Toggle Button: Opens/Closes Sidebar on Desktop and Mobile */}

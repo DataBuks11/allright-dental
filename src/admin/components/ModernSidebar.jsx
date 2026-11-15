@@ -96,7 +96,7 @@ const ModernSidebar = ({ isExpanded, setIsExpanded, mobileOpen, setMobileOpen })
 
       {/* ================= 2. DESKTOP EXPANDABLE / COLLAPSIBLE SIDEBAR ================= */}
       <aside
-        className={`hidden md:flex flex-col justify-between py-4 bg-[#0B132B] text-slate-300 shadow-2xl border-r border-slate-800/80 sticky top-0 h-screen z-40 shrink-0 transition-all duration-300 ease-in-out ${
+        className={`hidden md:flex flex-col justify-between py-4 bg-[#0B132B]/85 backdrop-blur-xl text-slate-300 shadow-2xl border-r border-white/10 sticky top-0 h-screen z-40 shrink-0 transition-all duration-300 ease-in-out ${
           isExpanded ? "w-64 px-3" : "w-20 px-2"
         }`}
       >
