@@ -40,7 +40,7 @@ const ModernSidebar = ({ isExpanded, setIsExpanded, mobileOpen, setMobileOpen })
       icon: <FaCalendarAlt className="text-lg shrink-0" />,
       label: "Doctor Shalini Schedule",
       permission: "schedule:manage",
-      badge: "Wed-Sat"
+      badge: "Mon-Sat"
     },
     {
       to: "/admin/patients-directory",

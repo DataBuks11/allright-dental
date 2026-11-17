@@ -31,8 +31,8 @@ const getUpcomingDatesNY = (count = 10) => {
     const dateObj = new Date(y, m - 1, d + offset, 12, 0, 0);
     const dayOfWeek = dateObj.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
 
-    // Skip Sunday (0) and Tuesday (2) (Monday open)
-    if (dayOfWeek !== 0 && dayOfWeek !== 2) {
+    // Skip Sunday (0) (Monday through Saturday open)
+    if (dayOfWeek !== 0) {
       const yStr = dateObj.getFullYear();
       const mStr = String(dateObj.getMonth() + 1).padStart(2, "0");
       const dStr = String(dateObj.getDate()).padStart(2, "0");
@@ -65,7 +65,7 @@ export default function Calendar() {
   const selectedDateObj = parseLocalDate(selectedDate);
   const selectedDayOfWeek = selectedDateObj ? selectedDateObj.getDay() : null;
   const isSaturday = selectedDayOfWeek === 6;
-  const isClosed = selectedDayOfWeek === 0 || selectedDayOfWeek === 2;
+  const isClosed = selectedDayOfWeek === 0;
 
   // Saturday-specific slots (9:00 AM – 12:00 PM strictly - 4 morning slots)
   const saturdayTimes = ["9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM"];
@@ -157,10 +157,10 @@ export default function Calendar() {
           {isClosed ? (
             <div className="bg-red-50 border-2 border-red-300 text-red-800 p-6 rounded-2xl text-center my-4 w-full">
               <h4 className="font-bold text-lg mb-1">
-                🚨 Clinic Closed on {selectedDayOfWeek === 2 ? "Tuesdays" : "Sundays"}
+                🚨 Clinic Closed on Sundays
               </h4>
               <p className="text-sm">
-                No room or emergency appointments are scheduled on {selectedDayOfWeek === 2 ? "Tuesdays" : "Sundays"}.
+                No room or emergency appointments are scheduled on Sundays.
               </p>
             </div>
           ) : isSaturday ? (

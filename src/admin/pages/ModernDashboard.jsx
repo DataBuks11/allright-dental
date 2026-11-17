@@ -653,7 +653,7 @@ export default function ModernDashboard() {
             {/* Info Row: Timing & Consultation Duration */}
             <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-slate-100 text-[10px] text-slate-600">
               <span className="flex items-center gap-1 font-semibold text-slate-700">
-                <FaRegClock className="text-slate-400 text-[9px]" /> Wed - Sat Open
+                <FaRegClock className="text-slate-400 text-[9px]" /> Mon - Sat Open
               </span>
               <span className="flex items-center gap-1 font-medium text-slate-500">
                 ⏱️ 30 - 45 min

@@ -80,7 +80,7 @@ const formatLocalDate = (d) => {
 
 const getInitialOpenDate = () => {
   const d = getNYDate();
-  while (d.getDay() === 0 || d.getDay() === 2) {
+  while (d.getDay() === 0) {
     d.setDate(d.getDate() + 1);
   }
   return d;
@@ -129,8 +129,8 @@ const [intervalId, setIntervalId] = useState(null);
   const updateSelectedDateFromDropdown = (day, month) => {
     const dateObj = new Date(currentYear, month, day);
   
-    // Skip if Sunday (0) or Tuesday (2) (Clinic is closed)
-    if (dateObj.getDay() === 0 || dateObj.getDay() === 2) {
+    // Skip if Sunday (0) (Clinic is closed)
+    if (dateObj.getDay() === 0) {
       setSelectedDate(""); // Deselect
       return;
     }
@@ -660,8 +660,8 @@ const isRegisterRequiredFilled =
       const monthName = date.toLocaleDateString('en-US', { month: 'short', timeZone: 'America/New_York' });
       const dayNum = date.getDate();
 
-      // Skip Sunday (0) and Tuesday (2) (Clinic is closed)
-      if (date.getDay() !== 0 && date.getDay() !== 2) {
+      // Skip Sunday (0) (Clinic is open Monday through Saturday)
+      if (date.getDay() !== 0) {
         const formattedDate = formatLocalDate(date);
 
         dates.push(
@@ -729,7 +729,7 @@ const isRegisterRequiredFilled =
           if (!date) return;
 
           const day = date.getDay();
-          if (day === 0 || day === 2) return;
+          if (day === 0) return;
 
           // Remove timezone issue
           const y = date.getFullYear();
@@ -745,17 +745,17 @@ const isRegisterRequiredFilled =
         dateFormat="yyyy-MM-dd"
         placeholderText="Select a date"
 
-        // Disable Sunday & Tuesday (Monday open)
+        // Disable Sunday (Monday - Saturday open)
         filterDate={(d) => {
           const day = d.getDay();
-          return day !== 0 && day !== 2;
+          return day !== 0;
         }}
 
         className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl shadow-md 
                    focus:border-[#003BC4] focus:outline-none transition-all text-gray-700 font-medium"
         calendarClassName="rounded-xl shadow-xl border border-gray-200 p-2"
         dayClassName={(date) =>
-          date.getDay() === 0 || date.getDay() === 2
+          date.getDay() === 0
             ? "text-gray-300 cursor-not-allowed"
             : "hover:bg-blue-200 rounded-md transition"
         }
@@ -780,16 +780,16 @@ const isRegisterRequiredFilled =
         }
       }
 
-      // If Tuesday (2) or Sunday (0) → CLOSED. NO routine or emergency appointments!
-      if (day === 0 || day === 2) {
+      // If Sunday (0) → CLOSED. NO routine or emergency appointments!
+      if (day === 0) {
         return (
           <div className="bg-red-50 border-2 border-red-300 text-red-800 p-6 rounded-2xl text-center my-6 shadow-sm">
             <h4 className="font-bold text-lg mb-1">
-              🚨 Clinic Closed on {day === 2 ? "Tuesdays" : "Sundays"}
+              🚨 Clinic Closed on Sundays
             </h4>
             <p className="text-sm font-medium">
-              We do not accept routine or emergency appointments on {day === 2 ? "Tuesdays" : "Sundays"}.
-              Please choose an open day: Monday, Wednesday, Thursday, Friday (10:00 AM – 5:00 PM), or Saturday (9:00 AM – 12:00 PM).
+              We do not accept routine or emergency appointments on Sundays.
+              Please choose an open day: Monday through Friday (10:00 AM – 5:00 PM), or Saturday (9:00 AM – 12:00 PM).
             </p>
           </div>
         );

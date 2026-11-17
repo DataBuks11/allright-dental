@@ -64,9 +64,8 @@ export default function AdminTimeBlockPanel() {
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = getTodayNY();
     const d = parseLocalDate(today);
-    // If today is Sunday (0) or Tuesday (2), advance to next open clinic day
+    // If today is Sunday (0), advance to next open clinic day (Monday)
     if (d && d.getDay() === 0) d.setDate(d.getDate() + 1);
-    else if (d && d.getDay() === 2) d.setDate(d.getDate() + 1);
     return d ? formatLocalDate(d) : today;
   });
 
@@ -131,7 +130,7 @@ export default function AdminTimeBlockPanel() {
   const parsedDate = parseLocalDate(selectedDate);
   const dayOfWeek = parsedDate ? parsedDate.getDay() : null; // 0=Sun, 1=Mon, 2=Tue, 5=Fri, 6=Sat
   const isSaturday = dayOfWeek === 6;
-  const isClosed = dayOfWeek === 0 || dayOfWeek === 2;
+  const isClosed = dayOfWeek === 0;
 
   const formattedDayTitle = parsedDate
     ? parsedDate.toLocaleDateString("en-US", {
@@ -157,7 +156,7 @@ export default function AdminTimeBlockPanel() {
     while (count < 7) {
       const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + offset, 12, 0, 0);
       const dow = d.getDay();
-      if (dow !== 0 && dow !== 2) {
+      if (dow !== 0) {
         list.push({
           ymd: formatLocalDate(d),
           dayName: d.toLocaleDateString("en-US", { weekday: "short" }),
@@ -293,15 +292,24 @@ export default function AdminTimeBlockPanel() {
       return;
     }
     setIsRefreshing(true);
-    for (const r of rooms) {
-      for (const t of activeTimes) {
-        try {
-          await fetch("https://allrightdental.com/Backend_Dental/unblockSlot.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ date: selectedDate, room: r.id, time: t }),
-          });
-        } catch (e) {}
+    try {
+      await fetch("https://allrightdental.com/Backend_Dental/unblockSlot.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: selectedDate, unblockAll: true }),
+      });
+    } catch (e) {
+      // Fallback: individual unblock
+      for (const r of rooms) {
+        for (const t of activeTimes) {
+          try {
+            await fetch("https://allrightdental.com/Backend_Dental/unblockSlot.php", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ date: selectedDate, room: r.id, time: t }),
+            });
+          } catch (err) {}
+        }
       }
     }
     setBlockedSlots({});
@@ -450,7 +458,7 @@ export default function AdminTimeBlockPanel() {
                     setSelectedDate(formatLocalDate(date));
                   }
                 }}
-                filterDate={(d) => d.getDay() !== 0 && d.getDay() !== 2}
+                filterDate={(d) => d.getDay() !== 0}
                 dateFormat="yyyy-MM-dd"
                 className="pl-3 pr-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 focus:outline-none focus:border-[#003BC4] text-slate-900 bg-slate-50/50 cursor-pointer shadow-2xs"
               />
@@ -470,7 +478,6 @@ export default function AdminTimeBlockPanel() {
                 const d = parseLocalDate(selectedDate || getTodayNY()) || new Date();
                 d.setDate(d.getDate() + 1);
                 if (d.getDay() === 0) d.setDate(d.getDate() + 1); // skip Sun
-                if (d.getDay() === 2) d.setDate(d.getDate() + 1); // skip Tue
                 setSelectedDate(formatLocalDate(d));
               }}
               className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 transition-colors cursor-pointer"
@@ -556,11 +563,11 @@ export default function AdminTimeBlockPanel() {
           <div className="p-8 bg-rose-50/70 border border-rose-200 text-rose-800 rounded-2xl text-center space-y-2">
             <FaExclamationTriangle className="text-3xl text-rose-500 mx-auto" />
             <h3 className="font-extrabold text-base text-rose-900">
-              AllRight Dental is Closed on {dayOfWeek === 2 ? "Tuesdays" : "Sundays"}
+              AllRight Dental is Closed on Sundays
             </h3>
             <p className="text-xs text-rose-700 max-w-md mx-auto">
-              No appointments or time slot blocks are scheduled on {dayOfWeek === 2 ? "Tuesdays" : "Sundays"}.
-              Please select Monday, Wednesday, Thursday, Friday (10:00 AM – 5:00 PM), or Saturday (9:00 AM – 12:00 PM).
+              No appointments or time slot blocks are scheduled on Sundays.
+              Please select Monday – Friday (10:00 AM – 5:00 PM), or Saturday (9:00 AM – 12:00 PM).
             </p>
             <button
               type="button"
@@ -568,7 +575,6 @@ export default function AdminTimeBlockPanel() {
                 const d = parseLocalDate(selectedDate) || new Date();
                 d.setDate(d.getDate() + 1);
                 if (d.getDay() === 0) d.setDate(d.getDate() + 1);
-                if (d.getDay() === 2) d.setDate(d.getDate() + 1);
                 setSelectedDate(formatLocalDate(d));
               }}
               className="mt-2 px-4 py-1.5 bg-[#003BC4] text-white font-bold text-xs rounded-full shadow-xs cursor-pointer hover:bg-blue-700"

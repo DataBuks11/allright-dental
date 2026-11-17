@@ -11,6 +11,24 @@ import {
 } from "react-icons/fa";
 
 const INITIAL_SCHEDULE = {
+  Monday: [
+    { time: "10:00 AM", category: "morning", blocked: false, patient: null },
+    { time: "10:45 AM", category: "morning", blocked: false, patient: null },
+    { time: "11:30 AM", category: "morning", blocked: false, patient: null },
+    { time: "01:30 PM", category: "afternoon", blocked: false, patient: null },
+    { time: "02:15 PM", category: "afternoon", blocked: false, patient: null },
+    { time: "03:00 PM", category: "afternoon", blocked: false, patient: null },
+    { time: "04:00 PM", category: "afternoon", blocked: false, patient: null }
+  ],
+  Tuesday: [
+    { time: "10:00 AM", category: "morning", blocked: false, patient: null },
+    { time: "10:45 AM", category: "morning", blocked: false, patient: null },
+    { time: "11:30 AM", category: "morning", blocked: false, patient: null },
+    { time: "01:30 PM", category: "afternoon", blocked: false, patient: null },
+    { time: "02:15 PM", category: "afternoon", blocked: false, patient: null },
+    { time: "03:00 PM", category: "afternoon", blocked: false, patient: null },
+    { time: "04:00 PM", category: "afternoon", blocked: false, patient: null }
+  ],
   Wednesday: [
     { time: "10:00 AM", category: "morning", blocked: false, patient: "Scott Talley" },
     { time: "10:45 AM", category: "morning", blocked: false, patient: null },
@@ -71,7 +89,7 @@ const ModernSchedule = () => {
     setTimeout(() => setFeedback(""), 2500);
   };
 
-  const days = ["Wednesday", "Thursday", "Friday", "Saturday"];
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
   return (
     <div className="space-y-5 w-full">

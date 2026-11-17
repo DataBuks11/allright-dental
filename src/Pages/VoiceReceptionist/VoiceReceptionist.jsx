@@ -138,11 +138,11 @@ export const getClinicAvailableSlots = () => {
     const d = new Date(nyNow.getFullYear(), nyNow.getMonth(), nyNow.getDate() + i);
     const dow = d.getDay(); // 0: Sun, 1: Mon, 2: Tue, 3: Wed, 4: Thu, 5: Fri, 6: Sat
     
-    // Open days: Wednesday (3), Thursday (4), Friday (5), Saturday (6)
-    if (dow >= 3 && dow <= 6) {
+    // Open days: Monday (1) through Saturday (6)
+    if (dow >= 1 && dow <= 6) {
       if (i === 0) {
-        if (dow === 6 && currentNYHour >= 12) continue; // Saturday closes 1:00 PM
-        if (dow >= 3 && dow <= 5 && currentNYHour >= 16) continue; // Wed-Fri closes 5:00 PM
+        if (dow === 6 && currentNYHour >= 12) continue; // Saturday closes 12:00 PM
+        if (dow >= 1 && dow <= 5 && currentNYHour >= 17) continue; // Mon-Fri closes 5:00 PM
       }
       
       const dName = dayNames[dow];
@@ -246,10 +246,10 @@ const getDynamicSystemPromptEn = () => {
     const dateFormatted = `${fullMonthNames[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
     
     let statusText = "CLOSED";
-    if (dayName === "Wednesday" || dayName === "Thursday" || dayName === "Friday") {
+    if (dayName === "Monday" || dayName === "Tuesday" || dayName === "Wednesday" || dayName === "Thursday" || dayName === "Friday") {
       statusText = "OPEN 10:00 AM - 5:00 PM";
     } else if (dayName === "Saturday") {
-      statusText = "OPEN 9:00 AM - 1:00 PM (Half-day morning consultations strictly)";
+      statusText = "OPEN 9:00 AM - 12:00 PM (Half-day morning consultations strictly)";
     } else {
       statusText = "CLOSED";
     }
@@ -265,9 +265,9 @@ Clinic Address: 229 Plaza Boulevard, Suite 23, Morrisville, Pennsylvania 19067.
 Parking & Access: Ample free storefront parking with easy ground-floor accessibility.
 
 CLINIC OPERATING DAYS & HOURS:
-- Wednesday, Thursday, Friday: 10:00 AM - 5:00 PM
-- Saturday: 9:00 AM - 1:00 PM (Half-day morning consultations strictly)
-- Sunday, Monday, Tuesday: CLOSED
+- Monday through Friday: 10:00 AM - 5:00 PM
+- Saturday: 9:00 AM - 12:00 PM (Half-day morning consultations strictly)
+- Sunday: CLOSED
 
 ACCEPTED DENTAL INSURANCES & FINANCING:
 - Principal Life, Delta Dental, MetLife, Cigna, Guardian, Aetna, Humana, Keystone First, United Healthcare (all PPO plans).
