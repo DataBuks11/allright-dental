@@ -3,6 +3,7 @@ import { useRef } from "react";
 import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./Appointment.css";
+import FAQSection from '../FAQSection/FAQSection';
 import {
   FaUser,
   FaCalendarAlt,
@@ -31,17 +32,6 @@ function AlertModal({ message, onClose }) {
     </div>
   );
 }
-
-// Helper to sync selectedDate string from day + month
-function updateSelectedDateFromDropdown(day, month) {
-  const tempDate = new Date(currentYear, month, day);
-  const dayName = tempDate.toLocaleDateString('en-US', { weekday: 'short' });
-  const monthName = tempDate.toLocaleDateString('en-US', { month: 'short' });
-  const formattedDate = `${dayName} ${monthName} ${day}`;
-  setSelectedDate(formattedDate);
-}
-
-
 
 // ✅ Clinic Timezone: Strictly America/New_York (Morrisville, PA - US Eastern Time)
 const getNYDate = (base = new Date()) => {
