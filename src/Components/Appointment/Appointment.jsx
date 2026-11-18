@@ -45,6 +45,34 @@ const parseLocalDate = (dateStr) => {
   return new Date(y, m, d, 12, 0, 0);
 };
 
+// Clinic Timezone helper (Morrisville, PA - America/New_York)
+const getNYDate = (base = new Date()) => {
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: false
+    });
+    const parts = formatter.formatToParts(base);
+    const p = {};
+    for (const part of parts) p[part.type] = part.value;
+    return new Date(
+      parseInt(p.year, 10),
+      parseInt(p.month, 10) - 1,
+      parseInt(p.day, 10),
+      parseInt(p.hour, 10) || 0,
+      parseInt(p.minute, 10) || 0
+    );
+  } catch {
+    return new Date();
+  }
+};
+
 // Generate upcoming open clinic dates in US Eastern Time (Morrisville, PA - America/New_York)
 const getUpcomingDatesNY = (count = 25) => {
   const formatter = new Intl.DateTimeFormat("en-CA", {
@@ -336,7 +364,7 @@ useEffect(() => {
       }
 
       setBlockedSlots(blockedMap);
-    } catch (error) {
+    } catch {
       // Graceful fallback without crashing console
     }
   };
