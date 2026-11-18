@@ -65,10 +65,10 @@ export const DEMO_USERS = {
   [ROLES.DOCTOR]: {
     id: "USR-002",
     username: "dr.associate",
-    name: "Dr. Marcus Vance, DDS",
-    title: "Associate Endodontist",
+    name: "Associate Clinician",
+    title: "Associate Clinician",
     role: ROLES.DOCTOR,
-    email: "dr.vance@allrightdental.com",
+    email: "associate@allrightdental.com",
     phone: "(215) 295-1349",
     mfaEnabled: true,
     mfaMethod: "TOTP",

@@ -239,8 +239,8 @@ const ModernLogin = () => {
                 onClick={() => handleQuickRole(ROLES.DOCTOR)}
                 className="text-left p-2 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group"
               >
-                <p className="text-xs font-bold text-slate-800 group-hover:text-blue-600">Dr. Vance</p>
-                <p className="text-[10px] text-slate-500">Associate Clinician</p>
+                <p className="text-xs font-bold text-slate-800 group-hover:text-blue-600">Associate Clinician</p>
+                <p className="text-[10px] text-slate-500">Clinical Provider</p>
               </button>
 
               <button
