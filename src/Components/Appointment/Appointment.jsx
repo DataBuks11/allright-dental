@@ -315,15 +315,19 @@ const handleSubmit = async (e) => {
 const [blockedSlots, setBlockedSlots] = useState({});
 
 useEffect(() => {
-  if (!selectedDate) return;
+  if (!showCalendar || !selectedDate) return;
 
   const fetchBlockedSlots = async () => {
     try {
       const response = await fetch(
         `https://allrightdental.com/Backend_Dental/getBlockedSlots.php?date=${selectedDate}`
       );
-      const data = await response.json();
+      if (!response.ok) return;
 
+      const text = await response.text();
+      if (!text || text.trim().startsWith("<")) return; // Guard against HTML fallback
+
+      const data = JSON.parse(text);
       const blockedMap = {};
       if (Array.isArray(data)) {
         data.forEach(({ room, time, status }) => {
@@ -333,14 +337,14 @@ useEffect(() => {
 
       setBlockedSlots(blockedMap);
     } catch (error) {
-      console.error("Failed to fetch blocked slots:", error);
+      // Graceful fallback without crashing console
     }
   };
 
   fetchBlockedSlots();
-  const interval = setInterval(fetchBlockedSlots, 2000);
+  const interval = setInterval(fetchBlockedSlots, 3000);
   return () => clearInterval(interval);
-}, [selectedDate]);
+}, [showCalendar, selectedDate]);
 
 const fianlbooked = async () => {
   const fullData = {
