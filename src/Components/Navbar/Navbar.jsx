@@ -33,21 +33,21 @@ function Navbar() {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm w-full h-16 sm:h-20 px-4 sm:px-6 lg:px-8 font-poppins transition-all duration-300">
-      <div className="container mx-auto max-w-[1140px]">
-        <div className="flex justify-between  items-center h-16 sm:h-20">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md shadow-sm w-full h-16 sm:h-20 px-3 sm:px-6 lg:px-8 font-poppins transition-all duration-300">
+      <div className="w-full max-w-[1440px] mx-auto">
+        <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo */}
-          <div className="flex items-center  flex-shrink-0">
+          <div className="flex items-center flex-shrink-0">
             <img
               src="/Allright_Dental_Logo_Redesign-removebg-preview.png"
               alt="Logo"
-              className="w-36 sm:w-48 cursor-pointer object-contain"
+              className="w-36 sm:w-44 lg:w-48 cursor-pointer object-contain"
               onClick={() => navigate('/')}
             />
           </div>
 
-          {/* Mobile menu button */}
-          <div className="flex items-center md:hidden">
+          {/* Mobile menu button (visible up to xl) */}
+          <div className="flex items-center xl:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-[#003BC4] hover:text-[#00B7AA] hover:bg-gray-100 focus:outline-none transition duration-300"
@@ -62,8 +62,8 @@ function Navbar() {
             </button>
           </div>
 
-          {/* Desktop Nav Items */}
-          <div className="hidden md:flex items-center space-x-1 lg:space-x-3">
+          {/* Desktop Nav Items (visible on xl and up: 1280px+) */}
+          <div className="hidden xl:flex items-center space-x-1 2xl:space-x-2.5">
             {navItems.map((item) => (
               item.subItems ? (
                 <div
@@ -73,7 +73,7 @@ function Navbar() {
                   <NavLink
                     to={item.href}
                     className={({ isActive }) =>
-                      `relative px-4 py-2 text-sm lg:text-base font-medium rounded-md transition-all duration-300 flex items-center ${isActive
+                      `relative px-2.5 2xl:px-3.5 py-2 text-sm 2xl:text-base font-medium rounded-md transition-all duration-300 flex items-center ${isActive
                         ? 'text-[#003BC4] font-semibold'
                         : 'text-gray-700 hover:text-[#00B7AA]'
                       }`
@@ -109,7 +109,7 @@ function Navbar() {
                   key={item.name}
                   to={item.href}
                   className={({ isActive }) =>
-                    `relative px-4 py-2 text-sm lg:text-base font-medium rounded-md transition-all duration-300 group ${isActive
+                    `relative px-2.5 2xl:px-3.5 py-2 text-sm 2xl:text-base font-medium rounded-md transition-all duration-300 group ${isActive
                       ? 'text-[#003BC4] font-semibold'
                       : 'text-gray-700 hover:text-[#00B7AA]'
                     }`
@@ -125,18 +125,17 @@ function Navbar() {
                 </NavLink>
               )
             ))}
-           <Button
-  btnContent="Book an Appointment"
-  link="/Appointment"
-  className="whitespace-nowrap flex justify-center items-center w-[220px] h-[48px] text-center"
-/>
-
+            <Button
+              btnContent="Book an Appointment"
+              link="/Appointment"
+              className="whitespace-nowrap flex justify-center items-center !w-auto px-4 2xl:px-5 py-2 h-[42px] 2xl:h-[46px] text-xs 2xl:text-sm font-semibold shrink-0"
+            />
           </div>
         </div>
       </div>
 
       {/* Mobile Nav Items */}
-      <div className={`md:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-[calc(100dvh-5rem)] overflow-y-auto shadow-xl border-b border-gray-100' : 'max-h-0 overflow-hidden'
+      <div className={`xl:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-[calc(100dvh-5rem)] overflow-y-auto shadow-xl border-b border-gray-100' : 'max-h-0 overflow-hidden'
         }`}>
         <div className="px-3 pt-2 pb-6 space-y-1 bg-white">
           {navItems.map((item, index) => (

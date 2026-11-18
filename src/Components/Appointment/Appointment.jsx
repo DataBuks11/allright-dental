@@ -33,32 +33,60 @@ function AlertModal({ message, onClose }) {
   );
 }
 
-// ✅ Clinic Timezone: Strictly America/New_York (Morrisville, PA - US Eastern Time)
-const getNYDate = (base = new Date()) => {
-  try {
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'America/New_York',
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      hour12: false
-    });
-    const parts = formatter.formatToParts(base);
-    const p = {};
-    for (const part of parts) p[part.type] = part.value;
-    return new Date(
-      parseInt(p.year, 10),
-      parseInt(p.month, 10) - 1,
-      parseInt(p.day, 10),
-      parseInt(p.hour, 10) || 0,
-      parseInt(p.minute, 10) || 0
-    );
-  } catch (err) {
-    return new Date(base);
+// Safe local date parser (immune to UTC midnight shifts)
+const parseLocalDate = (dateStr) => {
+  if (!dateStr || typeof dateStr !== "string") return null;
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return null;
+  const y = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10) - 1;
+  const d = parseInt(parts[2], 10);
+  if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
+  return new Date(y, m, d, 12, 0, 0);
+};
+
+// Generate upcoming open clinic dates in US Eastern Time (Morrisville, PA - America/New_York)
+const getUpcomingDatesNY = (count = 25) => {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const todayNYStr = formatter.format(new Date());
+  const [y, m, d] = todayNYStr.split("-").map(Number);
+
+  const result = [];
+  let offset = 0;
+  while (result.length < count) {
+    const dateObj = new Date(y, m - 1, d + offset, 12, 0, 0);
+    const dayOfWeek = dateObj.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+
+    // Skip Sunday (0) (Clinic is open Monday through Saturday)
+    if (dayOfWeek !== 0) {
+      const yStr = dateObj.getFullYear();
+      const mStr = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const dStr = String(dateObj.getDate()).padStart(2, "0");
+      const ymd = `${yStr}-${mStr}-${dStr}`;
+
+      const dayName = dateObj.toLocaleDateString("en-US", { weekday: "short" });
+      const monthName = dateObj.toLocaleDateString("en-US", { month: "short" });
+      const dayNum = dateObj.getDate();
+      const isSaturday = dayOfWeek === 6;
+
+      result.push({
+        ymd,
+        dayName,
+        monthName,
+        dayNum,
+        isSaturday,
+        dayOfWeek,
+        dateObj,
+      });
+    }
+    offset++;
   }
+  return result;
 };
 
 const formatLocalDate = (d) => {
@@ -66,14 +94,6 @@ const formatLocalDate = (d) => {
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
-};
-
-const getInitialOpenDate = () => {
-  const d = getNYDate();
-  while (d.getDay() === 0) {
-    d.setDate(d.getDate() + 1);
-  }
-  return d;
 };
 
 function Appointment() {
@@ -116,22 +136,10 @@ const [intervalId, setIntervalId] = useState(null);
     setTimeout(() => setShowPopup(false), 2500); // auto close in 2.5s
   };
 
-  const updateSelectedDateFromDropdown = (day, month) => {
-    const dateObj = new Date(currentYear, month, day);
-  
-    // Skip if Sunday (0) (Clinic is closed)
-    if (dateObj.getDay() === 0) {
-      setSelectedDate(""); // Deselect
-      return;
-    }
-  
-    setSelectedDate(formatLocalDate(dateObj));  
-  };
-  
-const initialOpenDay = getInitialOpenDate();
-const [selectedDate, setSelectedDate] = useState(formatLocalDate(initialOpenDay));
-const [selectedDay, setSelectedDay] = useState(initialOpenDay.getDate());
-const [selectedMonth, setSelectedMonth] = useState(initialOpenDay.getMonth());
+  const upcomingClinicDates = getUpcomingDatesNY(25);
+  const [selectedDate, setSelectedDate] = useState(() => upcomingClinicDates[0]?.ymd || "");
+  const [selectedDay, setSelectedDay] = useState(() => upcomingClinicDates[0]?.dayNum || 1);
+  const [selectedMonth, setSelectedMonth] = useState(() => upcomingClinicDates[0]?.dateObj?.getMonth() || 0);
 
 
   const [selectedTime, setSelectedTime] = useState("");
@@ -310,21 +318,18 @@ useEffect(() => {
   if (!selectedDate) return;
 
   const fetchBlockedSlots = async () => {
-    const year = currentYear;
-    const month = selectedMonth + 1;
-    const day = selectedDay.toString().padStart(2, "0");
-    const formattedDate = `${year}-${month.toString().padStart(2, "0")}-${day}`;
-
     try {
       const response = await fetch(
-        `https://allrightdental.com/Backend_Dental/getBlockedSlots.php?date=${formattedDate}`
+        `https://allrightdental.com/Backend_Dental/getBlockedSlots.php?date=${selectedDate}`
       );
       const data = await response.json();
 
       const blockedMap = {};
-      data.forEach(({ room, time, status }) => {
-        blockedMap[`${room}_${time}`] = status; // 👈 Save status instead of true
-      });
+      if (Array.isArray(data)) {
+        data.forEach(({ room, time, status }) => {
+          blockedMap[`${room}_${time}`] = status;
+        });
+      }
 
       setBlockedSlots(blockedMap);
     } catch (error) {
@@ -335,7 +340,7 @@ useEffect(() => {
   fetchBlockedSlots();
   const interval = setInterval(fetchBlockedSlots, 2000);
   return () => clearInterval(interval);
-}, [selectedDate, selectedMonth, selectedDay]);
+}, [selectedDate]);
 
 const fianlbooked = async () => {
   const fullData = {
@@ -636,123 +641,81 @@ const isRegisterRequiredFilled =
     {/* ✅ Manual Date Selection */}
    
 
-    {/* ✅ Date Tabs (7 days auto-generated, skip Sun & Mon) */}
+    {/* ✅ Date Tabs (Upcoming open days in Morrisville, PA) */}
     <div className="flex gap-3 mb-6 overflow-x-auto px-2">
-  {(() => {
-    const dates = [];
-    let i = 0;
+      {upcomingClinicDates.map((item) => (
+        <button
+          key={item.ymd}
+          type="button"
+          onClick={() => {
+            setSelectedDate(item.ymd);
+            setSelectedDay(item.dayNum);
+            setSelectedMonth(item.dateObj.getMonth());
+          }}
+          className={`flex flex-col items-center px-4 py-3 rounded-xl min-w-[80px] border font-medium transition ${
+            selectedDate === item.ymd
+              ? 'bg-[#003BC4] text-white shadow-md'
+              : 'bg-gray-100 text-gray-700 hover:bg-[#003BC4] hover:text-white'
+          }`}
+        >
+          <span className="text-sm">{item.dayName}</span>
+          <span className="text-base font-semibold">{item.monthName}</span>
+          <span className="text-lg font-bold">{item.dayNum}</span>
+        </button>
+      ))}
+    </div>
 
-    while (dates.length < 25) {   // ✅ SHOW 25 DAYS (America/New_York anchored)
-      const date = getNYDate();
-      date.setDate(date.getDate() + i);
+    {/* Calendar Section */}
+    <div className="flex justify-center mt-6">
+      <div className="flex items-center gap-4">
+        {/* Label */}
+        <label
+          htmlFor="date-picker"
+          className="text-lg font-semibold text-gray-700 min-w-[120px]"
+        >
+          Select Date:
+        </label>
 
-      const dayName = date.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/New_York' });
-      const monthName = date.toLocaleDateString('en-US', { month: 'short', timeZone: 'America/New_York' });
-      const dayNum = date.getDate();
+        {/* Calendar Wrapper */}
+        <div className="relative w-[260px]">
+          {/* Calendar Icon */}
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+            📅
+          </span>
 
-      // Skip Sunday (0) (Clinic is open Monday through Saturday)
-      if (date.getDay() !== 0) {
-        const formattedDate = formatLocalDate(date);
+          {/* Calendar Input */}
+          <ReactDatePicker
+            id="date-picker"
+            selected={parseLocalDate(selectedDate)}
+            onChange={(date) => {
+              if (!date) return;
+              const day = date.getDay();
+              if (day === 0) return; // Sunday closed
 
-        dates.push(
-          <button
-            key={i}
-            onClick={() => {
-              setSelectedDate(formattedDate);
-              setSelectedDay(dayNum);
+              const yStr = date.getFullYear();
+              const mStr = String(date.getMonth() + 1).padStart(2, "0");
+              const dStr = String(date.getDate()).padStart(2, "0");
+              const formatted = `${yStr}-${mStr}-${dStr}`;
+
+              setSelectedDate(formatted);
+              setSelectedDay(date.getDate());
               setSelectedMonth(date.getMonth());
             }}
-            className={`flex flex-col items-center px-4 py-3 rounded-xl min-w-[80px] border font-medium transition ${
-              selectedDate === formattedDate
-                ? 'bg-[#003BC4] text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-[#003BC4] hover:text-white'
-            }`}
-          >
-            <span className="text-sm">{dayName}</span>
-            <span className="text-base font-semibold">{monthName}</span>
-            <span className="text-lg font-bold">{dayNum}</span>
-          </button>
-        );
-      }
-
-      i++;
-    }
-
-    return dates;
-  })()}
-</div>
-
-{/* Calendar Section */}
-<div className="flex justify-center mt-6">
-
-  <div className="flex items-center gap-4">
-
-    {/* Label */}
-    <label
-      htmlFor="date-picker"
-      className="text-lg font-semibold text-gray-700 min-w-[120px]"
-    >
-      Select Date:
-    </label>
-
-    {/* Calendar Wrapper */}
-    <div className="relative w-[260px]">
-
-      {/* Calendar Icon */}
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-        📅
-      </span>
-
-      {/* Calendar Input */}
-      <ReactDatePicker
-        id="date-picker"
-        selected={
-          selectedDate
-            ? new Date(
-                selectedDate.split("-")[0],
-                selectedDate.split("-")[1] - 1,
-                selectedDate.split("-")[2]
-              )
-            : null
-        }
-        onChange={(date) => {
-          if (!date) return;
-
-          const day = date.getDay();
-          if (day === 0) return;
-
-          // Remove timezone issue
-          const y = date.getFullYear();
-          const m = String(date.getMonth() + 1).padStart(2, "0");
-          const d = String(date.getDate()).padStart(2, "0");
-
-          const formatted = `${y}-${m}-${d}`;
-
-          setSelectedDate(formatted);
-          setSelectedDay(date.getDate());
-          setSelectedMonth(date.getMonth());
-        }}
-        dateFormat="yyyy-MM-dd"
-        placeholderText="Select a date"
-
-        // Disable Sunday (Monday - Saturday open)
-        filterDate={(d) => {
-          const day = d.getDay();
-          return day !== 0;
-        }}
-
-        className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl shadow-md 
-                   focus:border-[#003BC4] focus:outline-none transition-all text-gray-700 font-medium"
-        calendarClassName="rounded-xl shadow-xl border border-gray-200 p-2"
-        dayClassName={(date) =>
-          date.getDay() === 0
-            ? "text-gray-300 cursor-not-allowed"
-            : "hover:bg-blue-200 rounded-md transition"
-        }
-      />
+            dateFormat="yyyy-MM-dd"
+            placeholderText="Select a date"
+            filterDate={(d) => d.getDay() !== 0}
+            className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl shadow-md 
+                       focus:border-[#003BC4] focus:outline-none transition-all text-gray-700 font-medium"
+            calendarClassName="rounded-xl shadow-xl border border-gray-200 p-2"
+            dayClassName={(date) =>
+              date.getDay() === 0
+                ? "text-gray-300 cursor-not-allowed"
+                : "hover:bg-blue-200 rounded-md transition"
+            }
+          />
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
 
 
@@ -760,15 +723,8 @@ const isRegisterRequiredFilled =
 
     {/* ✅ Time Slots */}
     {(() => {
-      let day = null;
-      if (selectedDate) {
-        const parts = selectedDate.split("-");
-        if (parts.length === 3) {
-          day = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10)).getDay();
-        } else {
-          day = new Date(selectedDate).getDay();
-        }
-      }
+      const selectedObj = parseLocalDate(selectedDate);
+      const day = selectedObj ? selectedObj.getDay() : null;
 
       // If Sunday (0) → CLOSED. NO routine or emergency appointments!
       if (day === 0) {
