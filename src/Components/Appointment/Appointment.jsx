@@ -200,8 +200,19 @@ const getDaysInMonth = (month, year) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patientData),
       });
-  
-      const result = await res.json();
+
+      if (!res.ok) {
+        setAlertMessage("❌ Error verifying patient. Try again later.");
+        return;
+      }
+
+      const text = await res.text();
+      if (!text || text.trim().startsWith("<")) {
+        setAlertMessage("❌ Error verifying patient. Try again later.");
+        return;
+      }
+
+      const result = JSON.parse(text);
   
       if (result.success) {
         setAlertMessage("✅ Patient Verified!");
